@@ -6,9 +6,11 @@ var React = require('../node_modules/react/react');
 var ReactDOM = require('../node_modules/react-dom/dist/react-dom.js');
 
 var Node = require('./views/node.js');
+var GateNode = require('./views/gateNode.js');
+var TGenNode = require('./views/tgenNode.js');
 var Edge = require('./views/edge.js');
 
-var NodeStylingProperties = { /* Only here temporarily until I think of a better solution ot make this global*/
+var NodeStylingProperties = { /* Only here temporarily until I think of a better solution to make this global*/
     height: 65,
     width: 65,
     rx: 7,
@@ -33,10 +35,8 @@ var App = React.createClass({
     render: function(){
         return(
             <svg id="appContainer" style={AppContainerStyle}>
-                <Node height={NodeStylingProperties.height + 6} width={NodeStylingProperties.width + 6} x="20" y="10" />
-                <Node height={NodeStylingProperties.height + 6} width={NodeStylingProperties.width + 6} x="200" y="10" />
-
-
+                <GateNode height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x="400" y="10"/>
+                <TGenNode height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x="600" y="10"/>
             </svg>
         )
     }
