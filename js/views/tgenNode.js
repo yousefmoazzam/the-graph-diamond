@@ -3,29 +3,51 @@
  */
 
 var React = require('../../node_modules/react/react');
+var NodeStore = require('../stores/nodeStore.js');
+
+function getTGenNodeState(){
+    return{
+        inports: NodeStore.getTGenNodeInportsState(),
+        outports: NodeStore.getTGenNodeOutportsState()
+    }
+}
 
 var TGenNode = React.createClass({
     getInitialState: function(){
-        return null
+        return getTGenNodeState();
     },
+
+    _onChange: function(){
+        this.setState(getTGenNodeState())
+    },
+
     componentDidMount: function(){
+        NodeStore.addChangeListener(this._onChange);
         console.log(this.props);
+        console.log(this.state);
     },
+
+    componentWillUnmount: function(){
+        NodeStore.removeChangeListener(this._onChange)
+    },
+
     nodeClick: function(){
         console.log("node has been clicked!");
     },
+
     nodeDrag: function(){
         console.log("node has been dragged!");
     },
+
     render: function(){
         return (
             <svg id="nodeContainer" {...this.props} draggable="true">
                 <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
                            style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
                            onClick={this.nodeClick} onDragStart={this.nodeDrag} />
-                <Port cx={NodeStylingProperties.width + 3} cy="33" r={PortStyling.portRadius}
+                <Port cx={TGenNodePortStyling.inportPositions.ena.x} cy={TGenNodePortStyling.inportPositions.ena.y} r={TGenNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
-                <Port cx={3} cy="33" r={PortStyling.portRadius}
+                <Port cx={TGenNodePortStyling.outportPositions.posn.x} cy={TGenNodePortStyling.outportPositions.posn.y} r={TGenNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
                 <InportEnaText x="10" y={NodeStylingProperties.height / 2 + 3}/>
                 <OutportPosnText x={NodeStylingProperties.width - 27} y={NodeStylingProperties.height / 2 + 3} />
@@ -44,10 +66,22 @@ var NodeStylingProperties = {
     ry: 7
 };
 
-var PortStyling = {
+var TGenNodePortStyling = {
     portRadius: 2,
     inportPositionRatio: 0,
-    outportPositionRatio: 1
+    outportPositionRatio: 1,
+    inportPositions: {
+        ena: {
+            x: 65 + 3,
+            y: 33
+        }
+    },
+    outportPositions: {
+        posn: {
+            x: 3,
+            y: 33
+        }
+    }
 };
 
 var InportEnaText = React.createClass({

@@ -5,7 +5,7 @@
 var Dispatcher = require('../../node_modules/flux/dist/Flux.js').Dispatcher;
 var assign = require('../../node_modules/object-assign/index.js');
 
-var AppDispatcher = new assign(new Dispatcher(), {
+var AppDispatcher = assign(new Dispatcher(), {
 
     handleAction: function(action){
         this.dispatch({

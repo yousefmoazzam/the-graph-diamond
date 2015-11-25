@@ -3,31 +3,53 @@
  */
 
 var React = require('../../node_modules/react/react');
+var NodeStore = require('../stores/nodeStore.js');
+
+function getGateNodeState(){
+    return{
+        inports: NodeStore.getGateNodeInportsState(),
+        outports: NodeStore.getGateNodeOutportsState()
+    }
+}
 
 var GateNode = React.createClass({
     getInitialState: function(){
-        return null
+        return getGateNodeState();
     },
+
+    _onChange: function(){
+        this.setState(getGateNodeState())
+    },
+
     componentDidMount: function(){
+        NodeStore.addChangeListener(this._onChange);
         console.log(this.props);
+        console.log(this.state);
     },
+
+    componentWillUnmount: function(){
+        NodeStore.removeChangeListener(this._onChange);
+    },
+
     nodeClick: function(){
         console.log("node has been clicked!");
     },
+
     nodeDrag: function(){
         console.log("node has been dragged!");
     },
+
     render: function(){
         return (
             <svg id="nodeContainer" {...this.props} draggable="true">
                 <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
                            style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
                            onClick={this.nodeClick} onDragStart={this.nodeDrag} />
-                <Port cx={3} cy="25" r={PortStyling.portRadius}
+                <Port cx={GateNodePortStyling.inportPositions.set.x} cy={GateNodePortStyling.inportPositions.set.y} r={GateNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
-                <Port cx={3} cy="40" r={PortStyling.portRadius}
+                <Port cx={GateNodePortStyling.inportPositions.reset.x} cy={GateNodePortStyling.inportPositions.reset.y} r={GateNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
-                <Port cx={NodeStylingProperties.width + 3} cy="33" r={PortStyling.portRadius}
+                <Port cx={GateNodePortStyling.outportPositions.out.x} cy={GateNodePortStyling.outportPositions.out.y} r={GateNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
 
                 <InportSetText x="10" y={NodeStylingProperties.height / 2 - 6} />
@@ -49,7 +71,23 @@ var NodeStylingProperties = {
     ry: 7
 };
 
-var PortStyling = {
+var GateNodePortStyling = {
+    inportPositions: {
+        set: {
+            x: 3,
+            y: 25
+        },
+        reset: {
+            x: 3,
+            y: 40
+        }
+    },
+    outportPositions: {
+        out: {
+            x: NodeStylingProperties.width + 3,
+            y: 33
+        }
+    },
     portRadius: 2,
     inportPositionRatio: 0,
     outportPositionRatio: 1
