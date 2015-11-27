@@ -3,7 +3,7 @@
  */
 
 var appConstants = {
-
+    GATENODE_CHANGEPOSITION: "GATENODE_CHANGEPOSITION"
 };
 
 module.exports = appConstants;

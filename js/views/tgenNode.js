@@ -7,6 +7,7 @@ var NodeStore = require('../stores/nodeStore.js');
 
 function getTGenNodeState(){
     return{
+        position: NodeStore.getTGenNodePosition(),
         inports: NodeStore.getTGenNodeInportsState(),
         outports: NodeStore.getTGenNodeOutportsState()
     }
@@ -41,7 +42,8 @@ var TGenNode = React.createClass({
 
     render: function(){
         return (
-            <svg id="nodeContainer" {...this.props} draggable="true">
+            <svg {...this.props}
+                 x={this.state.position.x} y={this.state.position.y}  >
                 <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
                            style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
                            onClick={this.nodeClick} onDragStart={this.nodeDrag} />
@@ -72,13 +74,13 @@ var TGenNodePortStyling = {
     outportPositionRatio: 1,
     inportPositions: {
         ena: {
-            x: 65 + 3,
+            x: 3,
             y: 33
         }
     },
     outportPositions: {
         posn: {
-            x: 3,
+            x: 65 + 3,
             y: 33
         }
     }

@@ -4,9 +4,11 @@
 
 var React = require('../../node_modules/react/react');
 var NodeStore = require('../stores/nodeStore.js');
+var nodeActions = require('../actions/nodeActions.js');
 
 function getGateNodeState(){
     return{
+        position: NodeStore.getGateNodePosition(),
         inports: NodeStore.getGateNodeInportsState(),
         outports: NodeStore.getGateNodeOutportsState()
     }
@@ -31,8 +33,11 @@ var GateNode = React.createClass({
         NodeStore.removeChangeListener(this._onChange);
     },
 
-    nodeClick: function(){
+    nodeClick: function(e){
         console.log("node has been clicked!");
+        //alert("Click!")
+        console.log(e);
+        console.log(e.clientX);
     },
 
     nodeDrag: function(){
@@ -41,10 +46,10 @@ var GateNode = React.createClass({
 
     render: function(){
         return (
-            <svg id="nodeContainer" {...this.props} draggable="true">
+            <svg {...this.props}>
                 <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
                            style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
-                           onClick={this.nodeClick} onDragStart={this.nodeDrag} />
+                           onClick={this.nodeClick}  />
                 <Port cx={GateNodePortStyling.inportPositions.set.x} cy={GateNodePortStyling.inportPositions.set.y} r={GateNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
                 <Port cx={GateNodePortStyling.inportPositions.reset.x} cy={GateNodePortStyling.inportPositions.reset.y} r={GateNodePortStyling.portRadius}
@@ -138,7 +143,7 @@ var NodeType = React.createClass({
             <text {...this.props} fontSize="8px" fontFamily="Verdana">Gate</text>
         )
     }
-})
+});
 
 
 

@@ -68,13 +68,13 @@ var portPositionsForNodes = {
     TGenNodePortStyling: {
         inportPositions: {
             ena: {
-                x: 65 + 3,
+                x: 3,
                 y: 33
             }
         },
         outportPositions: {
             posn: {
-                x: 3,
+                x: 65 + 3,
                 y: 33
             }
         }
@@ -122,8 +122,10 @@ var portPositionsForEdges = {
 
 };
 
-function updateNodePosition(){
-    /* Will be used to update the coordinates of a node, to then find the exact location of the ports a connected edge needs to stick to */
+function updateNodePosition(newCoordinates){
+    /* Will be used to update the coordinates of a node when dragged, to then find the new location of the ports a connected edge needs to stick to */
+    nodePositions.gateNode = newCoordinates;
+    /* Also need to update the port positions somehow! */
 }
 
 var nodeStore = assign({}, EventEmitter.prototype, {
@@ -172,6 +174,13 @@ AppDispatcher.register(function(payload){
     var item = action.item;
 
     switch(action.actionType){
+
+        case appConstants.GATENODE_CHANGEPOSITION:
+            console.log(payload);
+            console.log(action);
+            updateNodePosition(item);
+            nodeStore.emitChange();
+            break;
 
         default:
             return true

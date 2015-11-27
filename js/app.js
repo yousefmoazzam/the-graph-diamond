@@ -6,6 +6,7 @@ var React = require('../node_modules/react/react');
 var ReactDOM = require('../node_modules/react-dom/dist/react-dom.js');
 
 var NodeStore = require('./stores/nodeStore.js');
+var nodeActions = require('./actions/nodeActions.js');
 var Node = require('./views/node.js');
 var GateNode = require('./views/gateNode.js');
 var TGenNode = require('./views/tgenNode.js');
@@ -19,8 +20,12 @@ var NodeStylingProperties = { /* Only here temporarily until I think of a better
 };
 
 var NodeContainerStyle = {
-    "height": "100",
-    "width": "100"
+    //"height": "100",
+    //"width": "100"
+    cursor: 'move',
+    draggable: 'true',
+    className: 'nodeContainer',
+    //MozUserSelect: 'none'
 };
 
 var EdgeContainerStyle = {
@@ -57,9 +62,15 @@ var App = React.createClass({
     render: function(){
         return(
             <svg id="appContainer" style={AppContainerStyle}>
-                <GateNode height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.gateNodePosition.x} y={this.state.gateNodePosition.y} />
-                <TGenNode height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.tgenNodePosition.x} y={this.state.tgenNodePosition.y} />
-                <Edge/>
+                <g id="NodesGroup">
+                    <GateNode id="Gate1"  style={NodeContainerStyle}
+                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.gateNodePosition.x} y={this.state.gateNodePosition.y}/>
+                    <TGenNode id="TGen1" style={NodeContainerStyle}
+                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} />
+                </g>
+                <g id="EdgesGroup">
+                    <Edge/>
+                </g>
             </svg>
         )
     }
