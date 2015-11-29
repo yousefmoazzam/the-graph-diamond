@@ -82,6 +82,7 @@ var App = React.createClass({displayName: "App",
         NodeStore.removeChangeListener(this._onChange);
     },
 
+    /* react-draggabble event handlers */
     handleStart: function (event, ui) {
         console.log('Event: ', event);
         console.log('Position: ', ui.position);
@@ -97,10 +98,20 @@ var App = React.createClass({displayName: "App",
         console.log('Position: ', ui.position);
     },
 
+    dragOver: function(event){
+        console.log("dragOver");
+        console.log(event);
+    },
+
+    drop: function(ef){
+        console.log("drop");
+        console.log(ef);
+    },
+
 
     render: function(){
         return(
-            React.createElement("svg", {id: "appContainer", style: AppContainerStyle}, 
+            React.createElement("svg", {id: "appContainer", style: AppContainerStyle, onDrop: this.drop}, 
                 React.createElement("g", {id: "NodesGroup"}, 
                     React.createElement(GateNode, {id: "Gate1", style: NodeContainerStyle, 
                               height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.gateNodePosition.x, y: this.state.gateNodePosition.y}), 
@@ -119,7 +130,7 @@ var App = React.createClass({displayName: "App",
                            onDrag: this.handleDrag, 
                            onStop: this.handleStop}, 
                     React.createElement("rect", {className: "handle", height: "100", width: "100", id: "test", style: {fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}})
-                )
+                ), " /* The problem is that it uses CSS transforms to translate, not updating state... */"
 
             )
         )
@@ -289,7 +300,10 @@ var portPositionsForEdges = {
 
 function updateNodePosition(newCoordinates){
     /* Will be used to update the coordinates of a node when dragged, to then find the new location of the ports a connected edge needs to stick to */
-    nodePositions.gateNode = newCoordinates;
+    nodePositions.gateNode = {
+        x: nodePositions.gateNode.x + newCoordinates.x,
+        y: nodePositions.gateNode.y + newCoordinates.y
+    };
     /* Also need to update the port positions somehow! */
 }
 
@@ -450,12 +464,55 @@ var GateNode = React.createClass({displayName: "GateNode",
         console.log("node has been dragged!");
     },
 
+    mouseDown: function(e){
+        console.log("mouseDown");
+        console.log(e);
+        var startCoordinates = {
+            x: e.nativeEvent.clientX,
+            y: e.nativeEvent.clientY
+        };
+        this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
+    },
+
+    mouseUp: function(e){
+        console.log("mouseUp");
+        console.log(e)
+    },
+
+    dragEnd: function(e){
+        console.log("dragEnd");
+        console.log(e);
+
+    },
+
+    mouseLeave: function(e){
+        if(this.mouseDown){
+            e.preventDefault();
+        }
+        console.log("mouseLeave");
+        console.log(e);
+        var endCoordinates = {
+            x: e.nativeEvent.clientX,
+            y: e.nativeEvent.clientY
+        };
+        this.setState({afterDrag: endCoordinates});
+        this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
+    },
+
+    differenceBetweenMouseDownAndMouseLeave: function(start, end){
+        var differenceInCoordinates = {
+            x: end.x - start.x,
+            y: end.y - start.y
+        };
+        nodeActions.changeGateNodePosition(differenceInCoordinates);
+    },
+
     render: function(){
         return (
-            React.createElement("svg", React.__spread({},  this.props), 
+            React.createElement("svg", React.__spread({},  this.props, {onMouseDown: this.mouseDown, onMouseUp: this.mouseUp, onMouseLeave: this.mouseLeave}), 
                 React.createElement(Rectangle, {id: "rectangle", height: NodeStylingProperties.height, width: NodeStylingProperties.width, x: "3", y: "2", rx: NodeStylingProperties.rx, ry: NodeStylingProperties.ry, 
-                           style: {fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}, 
-                           onClick: this.nodeClick}), 
+                           style: {fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
+                            ), 
                 React.createElement(Port, {cx: GateNodePortStyling.inportPositions.set.x, cy: GateNodePortStyling.inportPositions.set.y, r: GateNodePortStyling.portRadius, 
                       style: {fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}), 
                 React.createElement(Port, {cx: GateNodePortStyling.inportPositions.reset.x, cy: GateNodePortStyling.inportPositions.reset.y, r: GateNodePortStyling.portRadius, 

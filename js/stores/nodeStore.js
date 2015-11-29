@@ -124,7 +124,10 @@ var portPositionsForEdges = {
 
 function updateNodePosition(newCoordinates){
     /* Will be used to update the coordinates of a node when dragged, to then find the new location of the ports a connected edge needs to stick to */
-    nodePositions.gateNode = newCoordinates;
+    nodePositions.gateNode = {
+        x: nodePositions.gateNode.x + newCoordinates.x,
+        y: nodePositions.gateNode.y + newCoordinates.y
+    };
     /* Also need to update the port positions somehow! */
 }
 

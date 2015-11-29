@@ -44,12 +44,55 @@ var GateNode = React.createClass({
         console.log("node has been dragged!");
     },
 
+    mouseDown: function(e){
+        console.log("mouseDown");
+        console.log(e);
+        var startCoordinates = {
+            x: e.nativeEvent.clientX,
+            y: e.nativeEvent.clientY
+        };
+        this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
+    },
+
+    mouseUp: function(e){
+        console.log("mouseUp");
+        console.log(e)
+    },
+
+    dragEnd: function(e){
+        console.log("dragEnd");
+        console.log(e);
+
+    },
+
+    mouseLeave: function(e){
+        if(this.mouseDown){
+            e.preventDefault();
+        }
+        console.log("mouseLeave");
+        console.log(e);
+        var endCoordinates = {
+            x: e.nativeEvent.clientX,
+            y: e.nativeEvent.clientY
+        };
+        this.setState({afterDrag: endCoordinates});
+        this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
+    },
+
+    differenceBetweenMouseDownAndMouseLeave: function(start, end){
+        var differenceInCoordinates = {
+            x: end.x - start.x,
+            y: end.y - start.y
+        };
+        nodeActions.changeGateNodePosition(differenceInCoordinates);
+    },
+
     render: function(){
         return (
-            <svg {...this.props}>
+            <svg {...this.props} onMouseDown={this.mouseDown} onMouseUp={this.mouseUp} onMouseLeave={this.mouseLeave} >
                 <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
                            style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
-                           onClick={this.nodeClick}  />
+                            />
                 <Port cx={GateNodePortStyling.inportPositions.set.x} cy={GateNodePortStyling.inportPositions.set.y} r={GateNodePortStyling.portRadius}
                       style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
                 <Port cx={GateNodePortStyling.inportPositions.reset.x} cy={GateNodePortStyling.inportPositions.reset.y} r={GateNodePortStyling.portRadius}

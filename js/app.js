@@ -62,6 +62,7 @@ var App = React.createClass({
         NodeStore.removeChangeListener(this._onChange);
     },
 
+    /* react-draggabble event handlers */
     handleStart: function (event, ui) {
         console.log('Event: ', event);
         console.log('Position: ', ui.position);
@@ -77,10 +78,20 @@ var App = React.createClass({
         console.log('Position: ', ui.position);
     },
 
+    dragOver: function(event){
+        console.log("dragOver");
+        console.log(event);
+    },
+
+    drop: function(ef){
+        console.log("drop");
+        console.log(ef);
+    },
+
 
     render: function(){
         return(
-            <svg id="appContainer" style={AppContainerStyle}>
+            <svg id="appContainer" style={AppContainerStyle}  onDrop={this.drop} >
                 <g id="NodesGroup">
                     <GateNode id="Gate1"  style={NodeContainerStyle}
                               height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.gateNodePosition.x} y={this.state.gateNodePosition.y}/>
@@ -99,7 +110,7 @@ var App = React.createClass({
                            onDrag={this.handleDrag}
                            onStop={this.handleStop}>
                     <rect className="handle" height="100" width="100" id="test" style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}} ></rect>
-                </Draggable>
+                </Draggable> /* The problem is that it uses CSS transforms to translate, not updating state... */
 
             </svg>
         )
