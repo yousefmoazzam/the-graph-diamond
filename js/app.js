@@ -12,6 +12,8 @@ var GateNode = require('./views/gateNode.js');
 var TGenNode = require('./views/tgenNode.js');
 var Edge = require('./views/edge.js');
 
+var Draggable = require('../node_modules/react-draggable/dist/react-draggable');
+
 var NodeStylingProperties = { /* Only here temporarily until I think of a better solution to make this global*/
     height: 65,
     width: 65,
@@ -59,6 +61,23 @@ var App = React.createClass({
     componentWillUnmount: function(){
         NodeStore.removeChangeListener(this._onChange);
     },
+
+    handleStart: function (event, ui) {
+        console.log('Event: ', event);
+        console.log('Position: ', ui.position);
+    },
+
+    handleDrag: function (event, ui) {
+        console.log('Event: ', event);
+        console.log('Position: ', ui.position);
+    },
+
+    handleStop: function (event, ui) {
+        console.log('Event: ', event);
+        console.log('Position: ', ui.position);
+    },
+
+
     render: function(){
         return(
             <svg id="appContainer" style={AppContainerStyle}>
@@ -71,6 +90,17 @@ var App = React.createClass({
                 <g id="EdgesGroup">
                     <Edge/>
                 </g>
+                <Draggable axis="both"
+                           handle=".handle"
+                           start={{x: 20, y: 20}} /* Starting position, not sure if its relative to the window, or just to its parent */
+                           grid={[25, 25]} /* If you want the object to snap to a certain quantised pixel interval, set it here */
+                           zIndex={100} /* I think this allows you to set if it goes on top of other thingas when dragged, or goes below them */
+                           onStart={this.handleStart}
+                           onDrag={this.handleDrag}
+                           onStop={this.handleStop}>
+                    <rect className="handle" height="100" width="100" id="test" style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}} ></rect>
+                </Draggable>
+
             </svg>
         )
     }
