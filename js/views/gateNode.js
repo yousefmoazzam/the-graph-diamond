@@ -8,9 +8,9 @@ var nodeActions = require('../actions/nodeActions.js');
 
 function getGateNodeState(){
     return{
-        position: NodeStore.getGateNodePosition(),
-        inports: NodeStore.getGateNodeInportsState(),
-        outports: NodeStore.getGateNodeOutportsState()
+        //position: NodeStore.getGateNodePosition(),
+        //inports: NodeStore.getGateNodeInportsState(),
+        //outports: NodeStore.getGateNodeOutportsState()
     }
 }
 
@@ -44,76 +44,6 @@ var GateNode = React.createClass({
     nodeDrag: function(){
         console.log("node has been dragged!");
     },
-
-    //mouseDown: function(e){
-    //    console.log("mouseDown");
-    //    console.log(e);
-    //    var startCoordinates = {
-    //        x: e.nativeEvent.clientX,
-    //        y: e.nativeEvent.clientY
-    //    };
-    //    this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
-    //},
-    //
-    //mouseUp: function(e){
-    //    console.log("mouseUp");
-    //    console.log(e)
-    //},
-    //
-    //dragStart: function(e){
-    //    e.preventDefault();
-    //    console.log("dragStart");
-    //    console.log(e);
-    //    e.dataTransfer.dropEffect ='move';
-    //
-    //    var startCoordinates = {
-    //        x: e.nativeEvent.clientX,
-    //        y: e.nativeEvent.clientY
-    //    };
-    //    this.setState({beforeDrag: startCoordinates});
-    //},
-    //
-    //dragEnd: function(e){
-    //    e.preventDefault();
-    //    e.stopPropagation();
-    //    console.log("dragEnd");
-    //    console.log(e);
-    //    //setTimeout(this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, this.state.afterDrag), 1000);
-    //
-    //
-    //},
-    //
-    //drag: function(e){
-    //    e.preventDefault();
-    //    console.log("drag");
-    //    console.log(e);
-    //},
-    //
-    //mouseLeave: function(e){
-    //    console.log("mouseLeave");
-    //    console.log(e);
-    //    var endCoordinates = {
-    //        x: e.nativeEvent.clientX,
-    //        y: e.nativeEvent.clientY
-    //    };
-    //    this.setState({afterDrag: endCoordinates});
-    //    //this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
-    //},
-    //
-    //differenceBetweenMouseDownAndMouseLeave: function(start, end){
-    //    var differenceInCoordinates = {
-    //        x: end.x - start.x,
-    //        y: end.y - start.y
-    //    };
-    //    nodeActions.changeGateNodePosition(differenceInCoordinates);
-    //},
-    //
-    //mouseMove: function(e){
-    //    //e.preventDefault();
-    //    console.log("mouseMove");
-    //    console.log(e);
-    //
-    //},
 
     rectangleDrag: function(e){
         console.log("rectangleDrag!");
@@ -188,6 +118,8 @@ var GateNode = React.createClass({
             x: end.x - start.x,
             y: end.y - start.y
         };
+
+        /* Could potentially debounce somewhere around here for better performance if necessary */
         nodeActions.changeGateNodePosition(differenceInCoordinates);
     },
 
@@ -324,3 +256,74 @@ var Port = React.createClass({
 });
 
 module.exports = GateNode;
+
+
+//mouseDown: function(e){
+//    console.log("mouseDown");
+//    console.log(e);
+//    var startCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
+//},
+//
+//mouseUp: function(e){
+//    console.log("mouseUp");
+//    console.log(e)
+//},
+//
+//dragStart: function(e){
+//    e.preventDefault();
+//    console.log("dragStart");
+//    console.log(e);
+//    e.dataTransfer.dropEffect ='move';
+//
+//    var startCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({beforeDrag: startCoordinates});
+//},
+//
+//dragEnd: function(e){
+//    e.preventDefault();
+//    e.stopPropagation();
+//    console.log("dragEnd");
+//    console.log(e);
+//    //setTimeout(this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, this.state.afterDrag), 1000);
+//
+//
+//},
+//
+//drag: function(e){
+//    e.preventDefault();
+//    console.log("drag");
+//    console.log(e);
+//},
+//
+//mouseLeave: function(e){
+//    console.log("mouseLeave");
+//    console.log(e);
+//    var endCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({afterDrag: endCoordinates});
+//    //this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
+//},
+//
+//differenceBetweenMouseDownAndMouseLeave: function(start, end){
+//    var differenceInCoordinates = {
+//        x: end.x - start.x,
+//        y: end.y - start.y
+//    };
+//    nodeActions.changeGateNodePosition(differenceInCoordinates);
+//},
+//
+//mouseMove: function(e){
+//    //e.preventDefault();
+//    console.log("mouseMove");
+//    console.log(e);
+//
+//},

@@ -10,8 +10,8 @@ function getEdgeState(){
         //startNode: NodeStore.getGateNodeOutPort(),
         //endNode: NodeStore.getTGenNodeEnaPort(),
 
-        gateNodePosition: NodeStore.getGateNodePosition(),
-        tgenNodePosition: NodeStore.getTGenNodePosition(),
+        Gate1Position: NodeStore.getGate1Position(),
+        TGen1Position: NodeStore.getTGen1Position(),
         gateNodeOut: NodeStore.getGateNodeOutportOut(),
         tgenNodeEna: NodeStore.getTGenNodeInportEna()
     }
@@ -35,8 +35,8 @@ var Edge = React.createClass({
             <svg id="edgeContainer" {...this.props}>
                 <Line height="100" width="100"
                       //x1={this.state.startNode.x} y1={this.state.startNode.y} x2={this.state.endNode.x} y2={this.state.endNode.y}
-                      x1={this.state.gateNodePosition.x + this.state.gateNodeOut.x} y1={this.state.gateNodePosition.y + this.state.gateNodeOut.y}
-                      x2={this.state.tgenNodePosition.x + this.state.tgenNodeEna.x} y2={this.state.tgenNodePosition.y + this.state.tgenNodeEna.y}
+                      x1={this.state.Gate1Position.x + this.state.gateNodeOut.x} y1={this.state.Gate1Position.y + this.state.gateNodeOut.y}
+                      x2={this.state.TGen1Position.x + this.state.tgenNodeEna.x} y2={this.state.TGen1Position.y + this.state.tgenNodeEna.y}
                       style={{strokeWidth: '5', stroke:"orange"}} />
             </svg>
         )

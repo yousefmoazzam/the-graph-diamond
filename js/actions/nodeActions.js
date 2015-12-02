@@ -11,6 +11,18 @@ var nodeActions = {
             actionType: appConstants.GATENODE_CHANGEPOSITION,
             item: item
         })
+    },
+    draggedElement: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.DRAGGED_ELEMENT,
+            item : item
+        })
+    },
+    changeNodePosition: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.CHANGE_NODEPOSITION,
+            item: item
+        })
     }
 };
 

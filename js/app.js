@@ -44,8 +44,8 @@ var AppContainerStyle = {
 
 function getAppState(){
     return{
-        gateNodePosition: NodeStore.getGateNodePosition(),
-        tgenNodePosition: NodeStore.getTGenNodePosition()
+        Gate1Position: NodeStore.getGate1Position(),
+        TGen1Position: NodeStore.getTGen1Position()
     }
 }
 
@@ -91,7 +91,8 @@ var App = React.createClass({
         console.log(evt);
         console.log(evt.currentTarget);
 
-        var draggedElement = evt.currentTarget;
+        this.setState({draggedElement: evt.currentTarget}); /* Need to send to store */
+        nodeActions.draggedElement(evt.currentTarget.id);
 
         var startCoordinates = {
             x: evt.nativeEvent.clientX,
@@ -107,14 +108,14 @@ var App = React.createClass({
     },
 
     moveElement: function(evt){
-        console.log("moveElement has occurred");
+        //console.log("moveElement has occurred");
     },
     anotherMoveFunction: function(e){
-        console.log("now move is different!");
+        //console.log("now move is different!");
 
         /* If mouse movement is minimal, don't change it, but if mouse movement is big enough, change the state */
 
-        console.log(e);
+        //console.log(e);
 
         var updatedCoordinates = {
             x: e.nativeEvent.clientX,
@@ -148,13 +149,14 @@ var App = React.createClass({
     },
 
     differenceBetweenMouseDownAndMouseUp: function(start, end){
-        console.log(start);
-        console.log(end);
+        //console.log(start);
+        //console.log(end);
         var differenceInCoordinates = {
             x: end.x - start.x,
             y: end.y - start.y
         };
-        nodeActions.changeGateNodePosition(differenceInCoordinates);
+        //nodeActions.changeGateNodePosition(differenceInCoordinates);
+        nodeActions.changeNodePosition(differenceInCoordinates);
     },
 
     mouseLeave: function(e){
@@ -170,7 +172,7 @@ var App = React.createClass({
             <svg id="appContainer" style={AppContainerStyle} onMouseMove={this.state.moveFunction} onMouseLeave={this.mouseLeave}
                  //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
             >
-                <rect id="dragArea" height="10000" width="10000" fill="grey"  style={{MozUserSelect: 'none'}}></rect>
+                <rect id="dragArea" height="10000" width="10000" fill="transparent"  style={{MozUserSelect: 'none'}}></rect>
 
                 <g id="EdgesGroup" >
                     <Edge/>
@@ -178,7 +180,7 @@ var App = React.createClass({
 
                 <g id="NodesGroup" >
                     <GateNode id="Gate1"  style={NodeContainerStyle}
-                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.gateNodePosition.x} y={this.state.gateNodePosition.y}
+                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.Gate1Position.x} y={this.state.Gate1Position.y}
                               //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
 
                               onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
@@ -186,7 +188,10 @@ var App = React.createClass({
 
                     />
                     <TGenNode id="TGen1" style={NodeContainerStyle}
-                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} />
+                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.TGen1Position.x} y={this.state.TGen1Position.y}
+
+                              onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
+                    />
                 </g>
 
                 <Draggable   axis="both"

@@ -12,6 +12,18 @@ var nodeActions = {
             actionType: appConstants.GATENODE_CHANGEPOSITION,
             item: item
         })
+    },
+    draggedElement: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.DRAGGED_ELEMENT,
+            item : item
+        })
+    },
+    changeNodePosition: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.CHANGE_NODEPOSITION,
+            item: item
+        })
     }
 };
 
@@ -64,8 +76,8 @@ var AppContainerStyle = {
 
 function getAppState(){
     return{
-        gateNodePosition: NodeStore.getGateNodePosition(),
-        tgenNodePosition: NodeStore.getTGenNodePosition()
+        Gate1Position: NodeStore.getGate1Position(),
+        TGen1Position: NodeStore.getTGen1Position()
     }
 }
 
@@ -111,7 +123,8 @@ var App = React.createClass({displayName: "App",
         console.log(evt);
         console.log(evt.currentTarget);
 
-        var draggedElement = evt.currentTarget;
+        this.setState({draggedElement: evt.currentTarget}); /* Need to send to store */
+        nodeActions.draggedElement(evt.currentTarget.id);
 
         var startCoordinates = {
             x: evt.nativeEvent.clientX,
@@ -127,14 +140,14 @@ var App = React.createClass({displayName: "App",
     },
 
     moveElement: function(evt){
-        console.log("moveElement has occurred");
+        //console.log("moveElement has occurred");
     },
     anotherMoveFunction: function(e){
-        console.log("now move is different!");
+        //console.log("now move is different!");
 
         /* If mouse movement is minimal, don't change it, but if mouse movement is big enough, change the state */
 
-        console.log(e);
+        //console.log(e);
 
         var updatedCoordinates = {
             x: e.nativeEvent.clientX,
@@ -168,13 +181,14 @@ var App = React.createClass({displayName: "App",
     },
 
     differenceBetweenMouseDownAndMouseUp: function(start, end){
-        console.log(start);
-        console.log(end);
+        //console.log(start);
+        //console.log(end);
         var differenceInCoordinates = {
             x: end.x - start.x,
             y: end.y - start.y
         };
-        nodeActions.changeGateNodePosition(differenceInCoordinates);
+        //nodeActions.changeGateNodePosition(differenceInCoordinates);
+        nodeActions.changeNodePosition(differenceInCoordinates);
     },
 
     mouseLeave: function(e){
@@ -190,7 +204,7 @@ var App = React.createClass({displayName: "App",
             React.createElement("svg", {id: "appContainer", style: AppContainerStyle, onMouseMove: this.state.moveFunction, onMouseLeave: this.mouseLeave
                  //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
             }, 
-                React.createElement("rect", {id: "dragArea", height: "10000", width: "10000", fill: "grey", style: {MozUserSelect: 'none'}}), 
+                React.createElement("rect", {id: "dragArea", height: "10000", width: "10000", fill: "transparent", style: {MozUserSelect: 'none'}}), 
 
                 React.createElement("g", {id: "EdgesGroup"}, 
                     React.createElement(Edge, null)
@@ -198,7 +212,7 @@ var App = React.createClass({displayName: "App",
 
                 React.createElement("g", {id: "NodesGroup"}, 
                     React.createElement(GateNode, {id: "Gate1", style: NodeContainerStyle, 
-                              height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.gateNodePosition.x, y: this.state.gateNodePosition.y, 
+                              height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.Gate1Position.x, y: this.state.Gate1Position.y, 
                               //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
 
                               onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
@@ -206,7 +220,10 @@ var App = React.createClass({displayName: "App",
 
                     ), 
                     React.createElement(TGenNode, {id: "TGen1", style: NodeContainerStyle, 
-                              height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6})
+                              height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.TGen1Position.x, y: this.state.TGen1Position.y, 
+
+                              onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
+                    )
                 ), 
 
                 React.createElement(Draggable, {axis: "both", 
@@ -309,7 +326,9 @@ ReactDOM.render(
  */
 
 var appConstants = {
-    GATENODE_CHANGEPOSITION: "GATENODE_CHANGEPOSITION"
+    GATENODE_CHANGEPOSITION: "GATENODE_CHANGEPOSITION",
+    DRAGGED_ELEMENT: "DRAGGED_ELEMENT",
+    CHANGE_NODEPOSITION: "CHANGE_NODEPOSITION"
 };
 
 module.exports = appConstants;
@@ -346,9 +365,11 @@ var assign = require('../../node_modules/object-assign/index.js');
 
 var CHANGE_EVENT = 'change';
 
+var draggedElement = null;
+
 var allNodeInfo = {
 
-    gateNode: {
+    Gate1: {
         inports: {
             "set": {connected: false, connectedTo: null}, /* connectedTo should probably be an array, since outports can be connected to multiple inports on different nodes */
             "reset": {connected: false, connectedTo: null}
@@ -358,7 +379,7 @@ var allNodeInfo = {
         }
     },
 
-    tgenNode: {
+    TGen1: {
         inports: {
             "ena": {connected: false, connectedTo: null}
         },
@@ -369,12 +390,12 @@ var allNodeInfo = {
 };
 
 var nodePositions = {
-    gateNode: {
+    Gate1: {
         x: 400,
         y: 100
     },
 
-    tgenNode: {
+    TGen1: {
         x: 600,
         y: 10
     }
@@ -423,14 +444,37 @@ var gateNodeOutports = portPositionsForNodes.GateNodePortStyling.outportPosition
 var tgenNodeInports = portPositionsForNodes.TGenNodePortStyling.inportPositions;
 var tgenNodeOutports = portPositionsForNodes.TGenNodePortStyling.outportPositions;
 
-function updateNodePosition(newCoordinates){
+function updateGate1Position(newCoordinates){
     /* Will be used to update the coordinates of a node when dragged, to then find the new location of the ports a connected edge needs to stick to */
-    nodePositions.gateNode = {
-        x: nodePositions.gateNode.x + newCoordinates.x,
-        y: nodePositions.gateNode.y + newCoordinates.y
+    nodePositions.Gate1 = {
+        x: nodePositions.Gate1.x + newCoordinates.x,
+        y: nodePositions.Gate1.y + newCoordinates.y
     };
     /* Also need to update the port positions somehow! */
 }
+
+function updateNodePosition(NodeInfo){
+    if(typeof allPossibleNodes[draggedElement] !== 'function'){
+        throw new Error('Invalid node id')
+    }
+     return allPossibleNodes[draggedElement](NodeInfo)
+}
+
+var allPossibleNodes = {
+
+    'Gate1': function(NodeInfo){
+        nodePositions.Gate1 = {
+            x: nodePositions.Gate1.x + NodeInfo.x,
+            y: nodePositions.Gate1.y + NodeInfo.y
+        };
+    },
+    'TGen1': function(NodeInfo){
+        nodePositions.TGen1 = {
+            x: nodePositions.TGen1.x + NodeInfo.x,
+            y: nodePositions.TGen1.y + NodeInfo.y
+        }
+    }
+};
 
 var nodeStore = assign({}, EventEmitter.prototype, {
     addChangeListener: function(cb){
@@ -442,27 +486,25 @@ var nodeStore = assign({}, EventEmitter.prototype, {
     emitChange: function(){
         this.emit(CHANGE_EVENT)
     },
-    getGateNodeInportsState: function(){
-        return allNodeInfo.gateNode.inports
+    getGate1InportsState: function(){
+        return allNodeInfo.Gate1.inports
     },
-    getGateNodeOutportsState: function(){
-        return allNodeInfo.gateNode.outports
+    getGate1OutportsState: function(){
+        return allNodeInfo.Gate1.outports
     },
-    getTGenNodeInportsState: function(){
-        return allNodeInfo.tgenNode.inports
+    getTGen1InportsState: function(){
+        return allNodeInfo.TGen1.inports
     },
-    getTGenNodeOutportsState: function(){
-        return allNodeInfo.tgenNode.outports
-    },
-    getTGenNodeState: function(){
-        return allNodeInfo.tgenNode
+    getTGen1OutportsState: function(){
+        return allNodeInfo.TGen1.outports
     },
 
-    getGateNodePosition: function(){
-        return nodePositions.gateNode;
+
+    getGate1Position: function(){
+        return nodePositions.Gate1;
     },
-    getTGenNodePosition: function(){
-        return nodePositions.tgenNode;
+    getTGen1Position: function(){
+        return nodePositions.TGen1;
     },
 
     /* For edge use */
@@ -489,9 +531,24 @@ AppDispatcher.register(function(payload){
         case appConstants.GATENODE_CHANGEPOSITION:
             console.log(payload);
             console.log(action);
+            updateGate1Position(item);
+            nodeStore.emitChange();
+            break;
+
+        case appConstants.DRAGGED_ELEMENT:
+            console.log(payload);
+            console.log(action);
+            draggedElement = item;
+            console.log(draggedElement);
+            break;
+
+        case appConstants.CHANGE_NODEPOSITION:
+            //console.log(payload);
+            //console.log(item);
             updateNodePosition(item);
             nodeStore.emitChange();
             break;
+
 
         default:
             return true
@@ -555,8 +612,8 @@ function getEdgeState(){
         //startNode: NodeStore.getGateNodeOutPort(),
         //endNode: NodeStore.getTGenNodeEnaPort(),
 
-        gateNodePosition: NodeStore.getGateNodePosition(),
-        tgenNodePosition: NodeStore.getTGenNodePosition(),
+        Gate1Position: NodeStore.getGate1Position(),
+        TGen1Position: NodeStore.getTGen1Position(),
         gateNodeOut: NodeStore.getGateNodeOutportOut(),
         tgenNodeEna: NodeStore.getTGenNodeInportEna()
     }
@@ -580,8 +637,8 @@ var Edge = React.createClass({displayName: "Edge",
             React.createElement("svg", React.__spread({id: "edgeContainer"},  this.props), 
                 React.createElement(Line, {height: "100", width: "100", 
                       //x1={this.state.startNode.x} y1={this.state.startNode.y} x2={this.state.endNode.x} y2={this.state.endNode.y}
-                      x1: this.state.gateNodePosition.x + this.state.gateNodeOut.x, y1: this.state.gateNodePosition.y + this.state.gateNodeOut.y, 
-                      x2: this.state.tgenNodePosition.x + this.state.tgenNodeEna.x, y2: this.state.tgenNodePosition.y + this.state.tgenNodeEna.y, 
+                      x1: this.state.Gate1Position.x + this.state.gateNodeOut.x, y1: this.state.Gate1Position.y + this.state.gateNodeOut.y, 
+                      x2: this.state.TGen1Position.x + this.state.tgenNodeEna.x, y2: this.state.TGen1Position.y + this.state.tgenNodeEna.y, 
                       style: {strokeWidth: '5', stroke:"orange"}})
             )
         )
@@ -609,9 +666,9 @@ var nodeActions = require('../actions/nodeActions.js');
 
 function getGateNodeState(){
     return{
-        position: NodeStore.getGateNodePosition(),
-        inports: NodeStore.getGateNodeInportsState(),
-        outports: NodeStore.getGateNodeOutportsState()
+        //position: NodeStore.getGateNodePosition(),
+        //inports: NodeStore.getGateNodeInportsState(),
+        //outports: NodeStore.getGateNodeOutportsState()
     }
 }
 
@@ -645,76 +702,6 @@ var GateNode = React.createClass({displayName: "GateNode",
     nodeDrag: function(){
         console.log("node has been dragged!");
     },
-
-    //mouseDown: function(e){
-    //    console.log("mouseDown");
-    //    console.log(e);
-    //    var startCoordinates = {
-    //        x: e.nativeEvent.clientX,
-    //        y: e.nativeEvent.clientY
-    //    };
-    //    this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
-    //},
-    //
-    //mouseUp: function(e){
-    //    console.log("mouseUp");
-    //    console.log(e)
-    //},
-    //
-    //dragStart: function(e){
-    //    e.preventDefault();
-    //    console.log("dragStart");
-    //    console.log(e);
-    //    e.dataTransfer.dropEffect ='move';
-    //
-    //    var startCoordinates = {
-    //        x: e.nativeEvent.clientX,
-    //        y: e.nativeEvent.clientY
-    //    };
-    //    this.setState({beforeDrag: startCoordinates});
-    //},
-    //
-    //dragEnd: function(e){
-    //    e.preventDefault();
-    //    e.stopPropagation();
-    //    console.log("dragEnd");
-    //    console.log(e);
-    //    //setTimeout(this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, this.state.afterDrag), 1000);
-    //
-    //
-    //},
-    //
-    //drag: function(e){
-    //    e.preventDefault();
-    //    console.log("drag");
-    //    console.log(e);
-    //},
-    //
-    //mouseLeave: function(e){
-    //    console.log("mouseLeave");
-    //    console.log(e);
-    //    var endCoordinates = {
-    //        x: e.nativeEvent.clientX,
-    //        y: e.nativeEvent.clientY
-    //    };
-    //    this.setState({afterDrag: endCoordinates});
-    //    //this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
-    //},
-    //
-    //differenceBetweenMouseDownAndMouseLeave: function(start, end){
-    //    var differenceInCoordinates = {
-    //        x: end.x - start.x,
-    //        y: end.y - start.y
-    //    };
-    //    nodeActions.changeGateNodePosition(differenceInCoordinates);
-    //},
-    //
-    //mouseMove: function(e){
-    //    //e.preventDefault();
-    //    console.log("mouseMove");
-    //    console.log(e);
-    //
-    //},
 
     rectangleDrag: function(e){
         console.log("rectangleDrag!");
@@ -789,6 +776,8 @@ var GateNode = React.createClass({displayName: "GateNode",
             x: end.x - start.x,
             y: end.y - start.y
         };
+
+        /* Could potentially debounce somewhere around here for better performance if necessary */
         nodeActions.changeGateNodePosition(differenceInCoordinates);
     },
 
@@ -926,6 +915,77 @@ var Port = React.createClass({displayName: "Port",
 
 module.exports = GateNode;
 
+
+//mouseDown: function(e){
+//    console.log("mouseDown");
+//    console.log(e);
+//    var startCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
+//},
+//
+//mouseUp: function(e){
+//    console.log("mouseUp");
+//    console.log(e)
+//},
+//
+//dragStart: function(e){
+//    e.preventDefault();
+//    console.log("dragStart");
+//    console.log(e);
+//    e.dataTransfer.dropEffect ='move';
+//
+//    var startCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({beforeDrag: startCoordinates});
+//},
+//
+//dragEnd: function(e){
+//    e.preventDefault();
+//    e.stopPropagation();
+//    console.log("dragEnd");
+//    console.log(e);
+//    //setTimeout(this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, this.state.afterDrag), 1000);
+//
+//
+//},
+//
+//drag: function(e){
+//    e.preventDefault();
+//    console.log("drag");
+//    console.log(e);
+//},
+//
+//mouseLeave: function(e){
+//    console.log("mouseLeave");
+//    console.log(e);
+//    var endCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({afterDrag: endCoordinates});
+//    //this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
+//},
+//
+//differenceBetweenMouseDownAndMouseLeave: function(start, end){
+//    var differenceInCoordinates = {
+//        x: end.x - start.x,
+//        y: end.y - start.y
+//    };
+//    nodeActions.changeGateNodePosition(differenceInCoordinates);
+//},
+//
+//mouseMove: function(e){
+//    //e.preventDefault();
+//    console.log("mouseMove");
+//    console.log(e);
+//
+//},
+
 },{"../../node_modules/react/react":172,"../actions/nodeActions.js":1,"../stores/nodeStore.js":5}],8:[function(require,module,exports){
 /**
  * Created by twi18192 on 19/11/15.
@@ -1049,9 +1109,9 @@ var NodeStore = require('../stores/nodeStore.js');
 
 function getTGenNodeState(){
     return{
-        position: NodeStore.getTGenNodePosition(),
-        inports: NodeStore.getTGenNodeInportsState(),
-        outports: NodeStore.getTGenNodeOutportsState()
+        //position: NodeStore.getTGenNodePosition(),
+        //inports: NodeStore.getTGenNodeInportsState(),
+        //outports: NodeStore.getTGenNodeOutportsState()
     }
 }
 
@@ -1084,19 +1144,24 @@ var TGenNode = React.createClass({displayName: "TGenNode",
 
     render: function(){
         return (
-            React.createElement("svg", React.__spread({},  this.props, 
-                 {x: this.state.position.x, y: this.state.position.y}), 
-                React.createElement(Rectangle, {id: "rectangle", height: NodeStylingProperties.height, width: NodeStylingProperties.width, x: "3", y: "2", rx: NodeStylingProperties.rx, ry: NodeStylingProperties.ry, 
-                           style: {fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}, 
-                           onClick: this.nodeClick, onDragStart: this.nodeDrag}), 
-                React.createElement(Port, {cx: TGenNodePortStyling.inportPositions.ena.x, cy: TGenNodePortStyling.inportPositions.ena.y, r: TGenNodePortStyling.portRadius, 
-                      style: {fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}), 
-                React.createElement(Port, {cx: TGenNodePortStyling.outportPositions.posn.x, cy: TGenNodePortStyling.outportPositions.posn.y, r: TGenNodePortStyling.portRadius, 
-                      style: {fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}), 
-                React.createElement(InportEnaText, {x: "10", y: NodeStylingProperties.height / 2 + 3}), 
-                React.createElement(OutportPosnText, {x: NodeStylingProperties.width - 27, y: NodeStylingProperties.height / 2 + 3}), 
+            React.createElement("svg", React.__spread({},  this.props), 
 
-                React.createElement(NodeName, {x: "17", y: NodeStylingProperties.height + 22})
+                React.createElement("g", {style: {MozUserSelect: 'none'}}, 
+                    React.createElement(Rectangle, {id: "nodeBackground", height: "105", width: "71", style: {fill: 'transparent', cursor: 'move'}}), " /* To allow the cursor to change when hovering over the entire node container */", 
+
+                    React.createElement(Rectangle, {id: "rectangle", height: NodeStylingProperties.height, width: NodeStylingProperties.width, x: "3", y: "2", rx: NodeStylingProperties.rx, ry: NodeStylingProperties.ry, 
+                               style: {fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
+                               //onClick={this.nodeClick} onDragStart={this.nodeDrag}
+                    ), 
+                    React.createElement(Port, {cx: TGenNodePortStyling.inportPositions.ena.x, cy: TGenNodePortStyling.inportPositions.ena.y, r: TGenNodePortStyling.portRadius, 
+                          style: {fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}), 
+                    React.createElement(Port, {cx: TGenNodePortStyling.outportPositions.posn.x, cy: TGenNodePortStyling.outportPositions.posn.y, r: TGenNodePortStyling.portRadius, 
+                          style: {fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}), 
+                    React.createElement(InportEnaText, {x: "10", y: NodeStylingProperties.height / 2 + 3, style: {MozUserSelect: 'none'}}), 
+                    React.createElement(OutportPosnText, {x: NodeStylingProperties.width - 27, y: NodeStylingProperties.height / 2 + 3, style: {MozUserSelect: 'none'}}), 
+
+                    React.createElement(NodeName, {x: "17", y: NodeStylingProperties.height + 22, style: {MozUserSelect: 'none'}})
+                )
 
             )
         )

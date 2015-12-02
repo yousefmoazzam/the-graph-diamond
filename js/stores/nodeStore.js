@@ -9,9 +9,11 @@ var assign = require('../../node_modules/object-assign/index.js');
 
 var CHANGE_EVENT = 'change';
 
+var draggedElement = null;
+
 var allNodeInfo = {
 
-    gateNode: {
+    Gate1: {
         inports: {
             "set": {connected: false, connectedTo: null}, /* connectedTo should probably be an array, since outports can be connected to multiple inports on different nodes */
             "reset": {connected: false, connectedTo: null}
@@ -21,7 +23,7 @@ var allNodeInfo = {
         }
     },
 
-    tgenNode: {
+    TGen1: {
         inports: {
             "ena": {connected: false, connectedTo: null}
         },
@@ -32,12 +34,12 @@ var allNodeInfo = {
 };
 
 var nodePositions = {
-    gateNode: {
+    Gate1: {
         x: 400,
         y: 100
     },
 
-    tgenNode: {
+    TGen1: {
         x: 600,
         y: 10
     }
@@ -86,14 +88,37 @@ var gateNodeOutports = portPositionsForNodes.GateNodePortStyling.outportPosition
 var tgenNodeInports = portPositionsForNodes.TGenNodePortStyling.inportPositions;
 var tgenNodeOutports = portPositionsForNodes.TGenNodePortStyling.outportPositions;
 
-function updateNodePosition(newCoordinates){
+function updateGate1Position(newCoordinates){
     /* Will be used to update the coordinates of a node when dragged, to then find the new location of the ports a connected edge needs to stick to */
-    nodePositions.gateNode = {
-        x: nodePositions.gateNode.x + newCoordinates.x,
-        y: nodePositions.gateNode.y + newCoordinates.y
+    nodePositions.Gate1 = {
+        x: nodePositions.Gate1.x + newCoordinates.x,
+        y: nodePositions.Gate1.y + newCoordinates.y
     };
     /* Also need to update the port positions somehow! */
 }
+
+function updateNodePosition(NodeInfo){
+    if(typeof allPossibleNodes[draggedElement] !== 'function'){
+        throw new Error('Invalid node id')
+    }
+     return allPossibleNodes[draggedElement](NodeInfo)
+}
+
+var allPossibleNodes = {
+
+    'Gate1': function(NodeInfo){
+        nodePositions.Gate1 = {
+            x: nodePositions.Gate1.x + NodeInfo.x,
+            y: nodePositions.Gate1.y + NodeInfo.y
+        };
+    },
+    'TGen1': function(NodeInfo){
+        nodePositions.TGen1 = {
+            x: nodePositions.TGen1.x + NodeInfo.x,
+            y: nodePositions.TGen1.y + NodeInfo.y
+        }
+    }
+};
 
 var nodeStore = assign({}, EventEmitter.prototype, {
     addChangeListener: function(cb){
@@ -105,27 +130,25 @@ var nodeStore = assign({}, EventEmitter.prototype, {
     emitChange: function(){
         this.emit(CHANGE_EVENT)
     },
-    getGateNodeInportsState: function(){
-        return allNodeInfo.gateNode.inports
+    getGate1InportsState: function(){
+        return allNodeInfo.Gate1.inports
     },
-    getGateNodeOutportsState: function(){
-        return allNodeInfo.gateNode.outports
+    getGate1OutportsState: function(){
+        return allNodeInfo.Gate1.outports
     },
-    getTGenNodeInportsState: function(){
-        return allNodeInfo.tgenNode.inports
+    getTGen1InportsState: function(){
+        return allNodeInfo.TGen1.inports
     },
-    getTGenNodeOutportsState: function(){
-        return allNodeInfo.tgenNode.outports
-    },
-    getTGenNodeState: function(){
-        return allNodeInfo.tgenNode
+    getTGen1OutportsState: function(){
+        return allNodeInfo.TGen1.outports
     },
 
-    getGateNodePosition: function(){
-        return nodePositions.gateNode;
+
+    getGate1Position: function(){
+        return nodePositions.Gate1;
     },
-    getTGenNodePosition: function(){
-        return nodePositions.tgenNode;
+    getTGen1Position: function(){
+        return nodePositions.TGen1;
     },
 
     /* For edge use */
@@ -152,9 +175,24 @@ AppDispatcher.register(function(payload){
         case appConstants.GATENODE_CHANGEPOSITION:
             console.log(payload);
             console.log(action);
+            updateGate1Position(item);
+            nodeStore.emitChange();
+            break;
+
+        case appConstants.DRAGGED_ELEMENT:
+            console.log(payload);
+            console.log(action);
+            draggedElement = item;
+            console.log(draggedElement);
+            break;
+
+        case appConstants.CHANGE_NODEPOSITION:
+            //console.log(payload);
+            //console.log(item);
             updateNodePosition(item);
             nodeStore.emitChange();
             break;
+
 
         default:
             return true

@@ -7,9 +7,9 @@ var NodeStore = require('../stores/nodeStore.js');
 
 function getTGenNodeState(){
     return{
-        position: NodeStore.getTGenNodePosition(),
-        inports: NodeStore.getTGenNodeInportsState(),
-        outports: NodeStore.getTGenNodeOutportsState()
+        //position: NodeStore.getTGenNodePosition(),
+        //inports: NodeStore.getTGenNodeInportsState(),
+        //outports: NodeStore.getTGenNodeOutportsState()
     }
 }
 
@@ -42,19 +42,24 @@ var TGenNode = React.createClass({
 
     render: function(){
         return (
-            <svg {...this.props}
-                 x={this.state.position.x} y={this.state.position.y}  >
-                <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
-                           style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
-                           onClick={this.nodeClick} onDragStart={this.nodeDrag} />
-                <Port cx={TGenNodePortStyling.inportPositions.ena.x} cy={TGenNodePortStyling.inportPositions.ena.y} r={TGenNodePortStyling.portRadius}
-                      style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
-                <Port cx={TGenNodePortStyling.outportPositions.posn.x} cy={TGenNodePortStyling.outportPositions.posn.y} r={TGenNodePortStyling.portRadius}
-                      style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
-                <InportEnaText x="10" y={NodeStylingProperties.height / 2 + 3}/>
-                <OutportPosnText x={NodeStylingProperties.width - 27} y={NodeStylingProperties.height / 2 + 3} />
+            <svg {...this.props} >
 
-                <NodeName x="17" y={NodeStylingProperties.height + 22} />
+                <g style={{MozUserSelect: 'none'}} >
+                    <Rectangle id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}}/> /* To allow the cursor to change when hovering over the entire node container */
+
+                    <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
+                               style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
+                               //onClick={this.nodeClick} onDragStart={this.nodeDrag}
+                    />
+                    <Port cx={TGenNodePortStyling.inportPositions.ena.x} cy={TGenNodePortStyling.inportPositions.ena.y} r={TGenNodePortStyling.portRadius}
+                          style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
+                    <Port cx={TGenNodePortStyling.outportPositions.posn.x} cy={TGenNodePortStyling.outportPositions.posn.y} r={TGenNodePortStyling.portRadius}
+                          style={{fill: 'black', stroke: 'black', 'strokeWidth': 1.65}}/>
+                    <InportEnaText x="10" y={NodeStylingProperties.height / 2 + 3} style={{MozUserSelect: 'none'}} />
+                    <OutportPosnText x={NodeStylingProperties.width - 27} y={NodeStylingProperties.height / 2 + 3} style={{MozUserSelect: 'none'}} />
+
+                    <NodeName x="17" y={NodeStylingProperties.height + 22} style={{MozUserSelect: 'none'}} />
+                </g>
 
             </svg>
         )
