@@ -36,7 +36,8 @@ var EdgeContainerStyle = {
 
 var AppContainerStyle = {
     "height": "100%",
-    "width": "100%"
+    "width": "100%",
+    //'backgroundColor': "green"
 };
 
 /* This should really fetch the node's x & y coordinates from the store somehow */
@@ -57,6 +58,12 @@ var App = React.createClass({
     },
     componentDidMount: function(){
         NodeStore.addChangeListener(this._onChange);
+        //console.log(document.getElementById('appContainer'));
+        //console.log(document.getElementById('Gate1'));
+
+        this.setState({moveFunction: this.moveElement})
+
+
     },
     componentWillUnmount: function(){
         NodeStore.removeChangeListener(this._onChange);
@@ -78,30 +85,111 @@ var App = React.createClass({
         console.log('Position: ', ui.position);
     },
 
-    dragOver: function(event){
-        console.log("dragOver");
-        console.log(event);
+
+    mouseDownSelectElement: function(evt){
+        console.log("mouseDown");
+        console.log(evt);
+        console.log(evt.currentTarget);
+
+        var draggedElement = evt.currentTarget;
+
+        var startCoordinates = {
+            x: evt.nativeEvent.clientX,
+            y: evt.nativeEvent.clientY
+        };
+        this.setState({beforeDrag: startCoordinates},
+            function(){
+                this.setState({moveFunction: this.anotherMoveFunction},
+                    function(){
+                        console.log("function has changed");
+                    })
+            });
     },
 
-    drop: function(ef){
-        console.log("drop");
-        console.log(ef);
+    moveElement: function(evt){
+        console.log("moveElement has occurred");
+    },
+    anotherMoveFunction: function(e){
+        console.log("now move is different!");
+
+        /* If mouse movement is minimal, don't change it, but if mouse movement is big enough, change the state */
+
+        console.log(e);
+
+        var updatedCoordinates = {
+            x: e.nativeEvent.clientX,
+            y: e.nativeEvent.clientY
+        };
+
+        if(!this.state.afterDrag){
+            this.setState({afterDrag: updatedCoordinates},
+                function(){
+                    this.differenceBetweenMouseDownAndMouseUp(this.state.beforeDrag, this.state.afterDrag)
+                })
+        }
+        else{
+            this.setState({beforeDrag: this.state.afterDrag},
+                function(){
+                    this.setState({afterDrag: updatedCoordinates},
+                        function(){
+                            this.differenceBetweenMouseDownAndMouseUp(this.state.beforeDrag, this.state.afterDrag)
+                        })
+                })
+        }
+    },
+
+    mouseUp: function(e){
+        console.log("mouseUp");
+        console.log(e);
+        this.setState({moveFunction: this.moveElement});
+        this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
+        this.setState({afterDrag: null});
+
+    },
+
+    differenceBetweenMouseDownAndMouseUp: function(start, end){
+        console.log(start);
+        console.log(end);
+        var differenceInCoordinates = {
+            x: end.x - start.x,
+            y: end.y - start.y
+        };
+        nodeActions.changeGateNodePosition(differenceInCoordinates);
+    },
+
+    mouseLeave: function(e){
+        console.log("mouseLeave, left the window, emulate a mouseUp event!");
+        this.setState({moveFunction: this.moveElement});
+        this.setState({beforeDrag: null});
+        this.setState({afterDrag: null});
     },
 
 
     render: function(){
         return(
-            <svg id="appContainer" style={AppContainerStyle}  onDrop={this.drop} >
-                <g id="NodesGroup">
+            <svg id="appContainer" style={AppContainerStyle} onMouseMove={this.state.moveFunction} onMouseLeave={this.mouseLeave}
+                 //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
+            >
+                <rect id="dragArea" height="10000" width="10000" fill="grey"  style={{MozUserSelect: 'none'}}></rect>
+
+                <g id="EdgesGroup" >
+                    <Edge/>
+                </g>
+
+                <g id="NodesGroup" >
                     <GateNode id="Gate1"  style={NodeContainerStyle}
-                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.gateNodePosition.x} y={this.state.gateNodePosition.y}/>
+                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.gateNodePosition.x} y={this.state.gateNodePosition.y}
+                              //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
+
+                              onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
+                              //onMouseMove={this.state.moveFunction}
+
+                    />
                     <TGenNode id="TGen1" style={NodeContainerStyle}
                               height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} />
                 </g>
-                <g id="EdgesGroup">
-                    <Edge/>
-                </g>
-                <Draggable axis="both"
+
+                <Draggable   axis="both"
                            handle=".handle"
                            start={{x: 20, y: 20}} /* Starting position, not sure if its relative to the window, or just to its parent */
                            grid={[25, 25]} /* If you want the object to snap to a certain quantised pixel interval, set it here */
@@ -121,3 +209,76 @@ ReactDOM.render(
     <App/>,
     document.getElementById('testContainer')
 );
+
+
+/* Dragging with drag events as opposed to mouse events */
+
+//dragStart: function(e){
+//    console.log("dragStart in app");
+//    console.log(e);
+//
+//    //e.dataTransfer.setData('application/x-moz-node', 'Gate1');
+//
+//    var startCoordinates = {
+//        x: e.nativeEvent.clientX,
+//        y: e.nativeEvent.clientY
+//    };
+//    this.setState({beforeDrag: startCoordinates});
+//    console.log(this.state);
+//    console.log(startCoordinates);
+//},
+//
+//drag: function(e){
+//    console.log("drag in app");
+//    console.log(e);
+//},
+//
+//dragEnd: function(e){
+//    console.log("dragEnd in app");
+//    console.log(e)
+//},
+//
+//dragEnter: function(e){
+//    e.preventDefault();
+//    e.stopPropagation();
+//    e.nativeEvent.preventDefault();
+//    e.nativeEvent.stopPropagation();
+//
+//    console.log("dragEnter");
+//    console.log(e);
+//},
+//
+//dragOver: function(event){
+//    event.preventDefault();
+//    event.stopPropagation();
+//    event.nativeEvent.preventDefault();
+//    event.nativeEvent.stopPropagation();
+//    console.log("dragOver");
+//    console.log(event);
+//},
+//
+//drop: function(ef){
+//    ef.preventDefault();
+//    ef.stopPropagation();
+//    console.log("drop");
+//    console.log(ef);
+//
+//    var endCoordinates = {
+//        x: ef.nativeEvent.clientX,
+//        y: ef.nativeEvent.clientY
+//    };
+//    this.setState({afterDrag: endCoordinates});
+//    console.log(this.state);
+//
+//    this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates); /* setStae doesnt mutate state immediately, it creates a pending transition, so just use endCoordinates directly */
+//},
+//
+//differenceBetweenMouseDownAndMouseLeave: function(start, end){
+//    console.log(start);
+//    console.log(end);
+//    var differenceInCoordinates = {
+//        x: end.x - start.x,
+//        y: end.y - start.y
+//    };
+//    nodeActions.changeGateNodePosition(differenceInCoordinates);
+//},

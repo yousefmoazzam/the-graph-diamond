@@ -86,42 +86,6 @@ var gateNodeOutports = portPositionsForNodes.GateNodePortStyling.outportPosition
 var tgenNodeInports = portPositionsForNodes.TGenNodePortStyling.inportPositions;
 var tgenNodeOutports = portPositionsForNodes.TGenNodePortStyling.outportPositions;
 
-var portPositionsForEdges = {
-    gateNode: {
-        inports: {
-            set: {
-                x: nodePositions.gateNode.x + gateNodeInports.set.x,
-                y: nodePositions.gateNode.y + gateNodeInports.set.y
-            },
-            reset: {
-                x: nodePositions.gateNode.x + gateNodeInports.reset.x,
-                y: nodePositions.gateNode.y + gateNodeInports.reset.y
-            }
-        },
-        outports: {
-            out: {
-                x: nodePositions.gateNode.x + gateNodeOutports.out.x,
-                y: nodePositions.gateNode.y + gateNodeOutports.out.y
-            }
-        }
-    },
-    tgenNode: {
-        inports: {
-            ena: {
-                x: nodePositions.tgenNode.x + tgenNodeInports.ena.x,
-                y: nodePositions.tgenNode.y + tgenNodeInports.ena.y
-            }
-        },
-        outports: {
-            posn: {
-                x: nodePositions.tgenNode.x + tgenNodeOutports.posn.x,
-                y: nodePositions.tgenNode.y + tgenNodeOutports.posn.y
-            }
-        }
-    }
-
-};
-
 function updateNodePosition(newCoordinates){
     /* Will be used to update the coordinates of a node when dragged, to then find the new location of the ports a connected edge needs to stick to */
     nodePositions.gateNode = {
@@ -164,11 +128,18 @@ var nodeStore = assign({}, EventEmitter.prototype, {
         return nodePositions.tgenNode;
     },
 
-    getGateNodeOutPort: function(){
-        return portPositionsForEdges.gateNode.outports.out;
+    /* For edge use */
+    //getGateNodeOutPort: function(){
+    //    return portPositionsForEdges.gateNode.outports.out;
+    //},
+    //getTGenNodeEnaPort: function(){
+    //    return portPositionsForEdges.tgenNode.inports.ena;
+    //},
+    getGateNodeOutportOut: function(){
+        return gateNodeOutports.out;
     },
-    getTGenNodeEnaPort: function(){
-        return portPositionsForEdges.tgenNode.inports.ena;
+    getTGenNodeInportEna: function(){
+        return tgenNodeInports.ena;
     }
 });
 
@@ -192,3 +163,44 @@ AppDispatcher.register(function(payload){
 });
 
 module.exports = nodeStore;
+
+
+/* Port calculation to render the edges properly has been moved to the render function of an edge;
+ this is to allow constant rerendering due to node position changes
+ */
+
+//var portPositionsForEdges = {
+//    gateNode: {
+//        inports: {
+//            set: {
+//                x: nodePositions.gateNode.x + gateNodeInports.set.x,
+//                y: nodePositions.gateNode.y + gateNodeInports.set.y
+//            },
+//            reset: {
+//                x: nodePositions.gateNode.x + gateNodeInports.reset.x,
+//                y: nodePositions.gateNode.y + gateNodeInports.reset.y
+//            }
+//        },
+//        outports: {
+//            out: {
+//                x: nodePositions.gateNode.x + gateNodeOutports.out.x,
+//                y: nodePositions.gateNode.y + gateNodeOutports.out.y
+//            }
+//        }
+//    },
+//    tgenNode: {
+//        inports: {
+//            ena: {
+//                x: nodePositions.tgenNode.x + tgenNodeInports.ena.x,
+//                y: nodePositions.tgenNode.y + tgenNodeInports.ena.y
+//            }
+//        },
+//        outports: {
+//            posn: {
+//                x: nodePositions.tgenNode.x + tgenNodeOutports.posn.x,
+//                y: nodePositions.tgenNode.y + tgenNodeOutports.posn.y
+//            }
+//        }
+//    }
+//
+//};
