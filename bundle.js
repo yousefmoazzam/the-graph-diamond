@@ -31,6 +31,12 @@ var nodeActions = {
             actionType: appConstants.SELECT_NODE,
             item: item
         })
+    },
+    deselectAllNodes: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.DESELECT_ALLNODES,
+            item: item
+        })
     }
 };
 
@@ -133,6 +139,8 @@ var App = React.createClass({displayName: "App",
 
         this.setState({draggedElement: evt.currentTarget}); /* Need to send to store */
         nodeActions.draggedElement(evt.currentTarget.id);
+        nodeActions.deselectAllNodes("deselect all nodes");
+
 
         var startCoordinates = {
             x: evt.nativeEvent.clientX,
@@ -253,13 +261,19 @@ var App = React.createClass({displayName: "App",
         this.setState({afterDrag: null});
     },
 
+    deselect: function(){
+        //console.log("dragArea has been clicked");
+        nodeActions.deselectAllNodes("deselect all nodes");
+    },
+
 
     render: function(){
         return(
             React.createElement("svg", {id: "appContainer", style: AppContainerStyle, onMouseMove: this.state.moveFunction, onMouseLeave: this.mouseLeave
                  //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
             }, 
-                React.createElement("rect", {id: "dragArea", height: "10000", width: "10000", fill: "transparent", style: {MozUserSelect: 'none'}}), 
+                React.createElement("rect", {id: "dragArea", height: "10000", width: "10000", fill: "transparent", style: {MozUserSelect: 'none'}, 
+                      onClick: this.deselect}), 
 
                 React.createElement("g", {id: "EdgesGroup"}, 
                     React.createElement(Edge, null)
@@ -390,7 +404,8 @@ var appConstants = {
     DRAGGED_ELEMENT: "DRAGGED_ELEMENT",
     CHANGE_NODEPOSITION: "CHANGE_NODEPOSITION",
 
-    SELECT_NODE: "SELECT_NODE"
+    SELECT_NODE: "SELECT_NODE",
+    DESELECT_ALLNODES: "DESELECT_ALLNODES"
 };
 
 module.exports = appConstants;
@@ -436,6 +451,13 @@ var nodeSelectedStates = {
 
 function selectNode(Node){
     nodeSelectedStates[Node] = true;
+}
+
+function deselectAllNodes(){
+    for(var node in nodeSelectedStates){
+        nodeSelectedStates[node] = false
+    }
+    console.log(nodeSelectedStates);
 }
 
 var allNodeInfo = {
@@ -644,6 +666,16 @@ AppDispatcher.register(function(payload){
             console.log(payload);
             console.log(item);
             selectNode(item);
+            console.log(nodeSelectedStates);
+            nodeStore.emitChange();
+            break;
+
+        case appConstants.DESELECT_ALLNODES:
+            console.log(payload);
+            console.log(item);
+            deselectAllNodes();
+            console.log(nodeSelectedStates.Gate1);
+            console.log(nodeSelectedStates.TGen1);
             nodeStore.emitChange();
             break;
 
@@ -885,7 +917,12 @@ var GateNode = React.createClass({displayName: "GateNode",
     mouseOver: function(){
         //console.log("mouseOver");
         var test = document.getElementById('GateRectangle');
-        test.style.stroke = '#797979'
+        if(this.state.selected === true){
+
+        }
+        else{
+            test.style.stroke = '#797979'
+        }
     },
 
     mouseLeave: function(){
@@ -896,12 +933,14 @@ var GateNode = React.createClass({displayName: "GateNode",
             console.log("this.state.selected is true, so don't reset the border colour");
         }
         else{
+            console.log("this.state.selected is false");
             test.style.stroke = 'black'
         }
     },
 
     nodeSelect: function(){
         console.log("Gate1 has been selected");
+        //nodeActions.deselectAllNodes("deselect all nodes"); /* Node deselection occurs on mouseDown instaed of in here, since if it's here the border doesn't change until dragging starts, instead of on mouseDown */
         nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
         console.log(this.state.selected);
 
@@ -924,7 +963,7 @@ var GateNode = React.createClass({displayName: "GateNode",
                                  ), 
 
                     React.createElement(Rectangle, {id: "GateRectangle", height: NodeStylingProperties.height, width: NodeStylingProperties.width, x: "3", y: "2", rx: NodeStylingProperties.rx, ry: NodeStylingProperties.ry, 
-                               style: {fill: 'lightgrey', 'strokeWidth': 1.65}, stroke: this.state.selected ? '#797979' : 'black'}
+                               style: {fill: 'lightgrey', 'strokeWidth': 1.65, stroke: this.state.selected === true ? '#797979' : 'black'}}
                                //onDragStart={this.rectangleDrag}
                     ), 
                     React.createElement(Port, {cx: GateNodePortStyling.inportPositions.set.x, cy: GateNodePortStyling.inportPositions.set.y, r: GateNodePortStyling.portRadius, 
@@ -1464,6 +1503,7 @@ var TGenNode = React.createClass({displayName: "TGenNode",
 
     nodeSelect: function(){
         console.log("TGen1 has been selected");
+        //nodeActions.deselectAllNodes("deselect all nodes");
         nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
         console.log(this.state.selected);
     },
@@ -1476,7 +1516,7 @@ var TGenNode = React.createClass({displayName: "TGenNode",
                     React.createElement(Rectangle, {id: "nodeBackground", height: "105", width: "71", style: {fill: 'transparent', cursor: 'move'}}), " /* To allow the cursor to change when hovering over the entire node container */", 
 
                     React.createElement(Rectangle, {id: "TGenRectangle", height: NodeStylingProperties.height, width: NodeStylingProperties.width, x: "3", y: "2", rx: NodeStylingProperties.rx, ry: NodeStylingProperties.ry, 
-                               style: {fill: 'lightgrey', 'strokeWidth': 1.65}, stroke: this.state.selected ? '#797979' : 'black'}
+                               style: {fill: 'lightgrey', 'strokeWidth': 1.65, stroke: this.state.selected ? '#797979' : 'black'}}
                                //onClick={this.nodeClick} onDragStart={this.nodeDrag}
                     ), 
                     React.createElement(Port, {cx: TGenNodePortStyling.inportPositions.ena.x, cy: TGenNodePortStyling.inportPositions.ena.y, r: TGenNodePortStyling.portRadius, 

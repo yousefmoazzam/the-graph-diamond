@@ -30,6 +30,12 @@ var nodeActions = {
             actionType: appConstants.SELECT_NODE,
             item: item
         })
+    },
+    deselectAllNodes: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.DESELECT_ALLNODES,
+            item: item
+        })
     }
 };
 

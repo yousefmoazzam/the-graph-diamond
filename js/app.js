@@ -94,6 +94,8 @@ var App = React.createClass({
 
         this.setState({draggedElement: evt.currentTarget}); /* Need to send to store */
         nodeActions.draggedElement(evt.currentTarget.id);
+        nodeActions.deselectAllNodes("deselect all nodes");
+
 
         var startCoordinates = {
             x: evt.nativeEvent.clientX,
@@ -214,13 +216,19 @@ var App = React.createClass({
         this.setState({afterDrag: null});
     },
 
+    deselect: function(){
+        //console.log("dragArea has been clicked");
+        nodeActions.deselectAllNodes("deselect all nodes");
+    },
+
 
     render: function(){
         return(
             <svg id="appContainer" style={AppContainerStyle} onMouseMove={this.state.moveFunction} onMouseLeave={this.mouseLeave}
                  //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
             >
-                <rect id="dragArea" height="10000" width="10000" fill="transparent"  style={{MozUserSelect: 'none'}}></rect>
+                <rect id="dragArea" height="10000" width="10000" fill="transparent"  style={{MozUserSelect: 'none'}}
+                      onClick={this.deselect}></rect>
 
                 <g id="EdgesGroup" >
                     <Edge/>

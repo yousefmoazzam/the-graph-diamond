@@ -66,6 +66,7 @@ var TGenNode = React.createClass({
 
     nodeSelect: function(){
         console.log("TGen1 has been selected");
+        //nodeActions.deselectAllNodes("deselect all nodes");
         nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
         console.log(this.state.selected);
     },
@@ -78,7 +79,7 @@ var TGenNode = React.createClass({
                     <Rectangle id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}}/> /* To allow the cursor to change when hovering over the entire node container */
 
                     <Rectangle id="TGenRectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
-                               style={{fill: 'lightgrey', 'strokeWidth': 1.65}} stroke={this.state.selected ? '#797979' : 'black'}
+                               style={{fill: 'lightgrey', 'strokeWidth': 1.65, stroke: this.state.selected ? '#797979' : 'black'}}
                                //onClick={this.nodeClick} onDragStart={this.nodeDrag}
                     />
                     <Port cx={TGenNodePortStyling.inportPositions.ena.x} cy={TGenNodePortStyling.inportPositions.ena.y} r={TGenNodePortStyling.portRadius}

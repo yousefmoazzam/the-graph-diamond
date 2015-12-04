@@ -20,6 +20,13 @@ function selectNode(Node){
     nodeSelectedStates[Node] = true;
 }
 
+function deselectAllNodes(){
+    for(var node in nodeSelectedStates){
+        nodeSelectedStates[node] = false
+    }
+    console.log(nodeSelectedStates);
+}
+
 var allNodeInfo = {
 
     Gate1: {
@@ -226,6 +233,16 @@ AppDispatcher.register(function(payload){
             console.log(payload);
             console.log(item);
             selectNode(item);
+            console.log(nodeSelectedStates);
+            nodeStore.emitChange();
+            break;
+
+        case appConstants.DESELECT_ALLNODES:
+            console.log(payload);
+            console.log(item);
+            deselectAllNodes();
+            console.log(nodeSelectedStates.Gate1);
+            console.log(nodeSelectedStates.TGen1);
             nodeStore.emitChange();
             break;
 

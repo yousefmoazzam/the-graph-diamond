@@ -129,7 +129,12 @@ var GateNode = React.createClass({
     mouseOver: function(){
         //console.log("mouseOver");
         var test = document.getElementById('GateRectangle');
-        test.style.stroke = '#797979'
+        if(this.state.selected === true){
+
+        }
+        else{
+            test.style.stroke = '#797979'
+        }
     },
 
     mouseLeave: function(){
@@ -140,12 +145,14 @@ var GateNode = React.createClass({
             console.log("this.state.selected is true, so don't reset the border colour");
         }
         else{
+            console.log("this.state.selected is false");
             test.style.stroke = 'black'
         }
     },
 
     nodeSelect: function(){
         console.log("Gate1 has been selected");
+        //nodeActions.deselectAllNodes("deselect all nodes"); /* Node deselection occurs on mouseDown instaed of in here, since if it's here the border doesn't change until dragging starts, instead of on mouseDown */
         nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
         console.log(this.state.selected);
 
@@ -168,7 +175,7 @@ var GateNode = React.createClass({
                                  />
 
                     <Rectangle id="GateRectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
-                               style={{fill: 'lightgrey', 'strokeWidth': 1.65}} stroke={this.state.selected ? '#797979' : 'black'}
+                               style={{fill: 'lightgrey', 'strokeWidth': 1.65, stroke: this.state.selected === true ? '#797979' : 'black'}}
                                //onDragStart={this.rectangleDrag}
                     />
                     <Port cx={GateNodePortStyling.inportPositions.set.x} cy={GateNodePortStyling.inportPositions.set.y} r={GateNodePortStyling.portRadius}
