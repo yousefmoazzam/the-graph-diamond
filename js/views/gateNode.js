@@ -3,6 +3,7 @@
  */
 
 var React = require('../../node_modules/react/react');
+var ReactDOM = require('../../node_modules/react-dom/dist/react-dom.js');
 var NodeStore = require('../stores/nodeStore.js');
 var nodeActions = require('../actions/nodeActions.js');
 
@@ -11,6 +12,7 @@ function getGateNodeState(){
         //position: NodeStore.getGateNodePosition(),
         //inports: NodeStore.getGateNodeInportsState(),
         //outports: NodeStore.getGateNodeOutportsState()
+        selected: NodeStore.getGate1SelectedState()
     }
 }
 
@@ -27,7 +29,8 @@ var GateNode = React.createClass({
         NodeStore.addChangeListener(this._onChange);
         console.log(this.props);
         console.log(this.state);
-        this.setState({moveFunction: this.moveElement})
+        this.setState({moveFunction: this.moveElement});
+        ReactDOM.findDOMNode(this).addEventListener('NodeSelect', this.nodeSelect);
     },
 
     componentWillUnmount: function(){
@@ -123,9 +126,37 @@ var GateNode = React.createClass({
         nodeActions.changeGateNodePosition(differenceInCoordinates);
     },
 
+    mouseOver: function(){
+        //console.log("mouseOver");
+        var test = document.getElementById('GateRectangle');
+        test.style.stroke = '#797979'
+    },
+
+    mouseLeave: function(){
+        //console.log("mouseLeave");
+        var test = document.getElementById('GateRectangle');
+
+        if(this.state.selected === true){
+            console.log("this.state.selected is true, so don't reset the border colour");
+        }
+        else{
+            test.style.stroke = 'black'
+        }
+    },
+
+    nodeSelect: function(){
+        console.log("Gate1 has been selected");
+        nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
+        console.log(this.state.selected);
+
+        //console.log(ReactDOM.findDOMNode(this));
+        //console.log(ReactDOM.findDOMNode(this).id);
+        //this.setState({selected: true});
+    },
+
     render: function(){
         return (
-            <svg {...this.props}
+            <svg {...this.props} onMouseOver={this.mouseOver} onMouseLeave={this.mouseLeave}
                 //onMouseDown={this.mouseDown} onMouseUp={this.mouseUp} onMouseLeave={this.mouseLeave} onMouseMove={this.mouseMove}
                 //                 onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
 
@@ -133,10 +164,11 @@ var GateNode = React.createClass({
             >
 
                 <g  style={{MozUserSelect: 'none'}} >
-                    <Rectangle id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}}/> /* To allow the cursor to change when hovering over the entire node container */
+                    <rect id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}} /* To allow the cursor to change when hovering over the entire node container */
+                                 />
 
-                    <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
-                               style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
+                    <Rectangle id="GateRectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
+                               style={{fill: 'lightgrey', 'strokeWidth': 1.65}} stroke={this.state.selected ? '#797979' : 'black'}
                                //onDragStart={this.rectangleDrag}
                     />
                     <Port cx={GateNodePortStyling.inportPositions.set.x} cy={GateNodePortStyling.inportPositions.set.y} r={GateNodePortStyling.portRadius}

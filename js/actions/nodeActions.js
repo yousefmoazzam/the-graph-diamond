@@ -23,6 +23,13 @@ var nodeActions = {
             actionType: appConstants.CHANGE_NODEPOSITION,
             item: item
         })
+    },
+
+    selectNode: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.SELECT_NODE,
+            item: item
+        })
     }
 };
 

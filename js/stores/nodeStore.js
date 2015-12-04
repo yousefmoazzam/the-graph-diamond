@@ -11,6 +11,15 @@ var CHANGE_EVENT = 'change';
 
 var draggedElement = null;
 
+var nodeSelectedStates = {
+    Gate1: false,
+    TGen1: false
+};
+
+function selectNode(Node){
+    nodeSelectedStates[Node] = true;
+}
+
 var allNodeInfo = {
 
     Gate1: {
@@ -42,6 +51,10 @@ var nodePositions = {
     TGen1: {
         x: 600,
         y: 10
+    },
+    PComp1: {
+        x: 800,
+        y: 200
     }
 };
 
@@ -117,6 +130,12 @@ var allPossibleNodes = {
             x: nodePositions.TGen1.x + NodeInfo.x,
             y: nodePositions.TGen1.y + NodeInfo.y
         }
+    },
+    'PComp1': function(NodeInfo){
+        nodePositions.PComp1 = {
+            x: nodePositions.PComp1.x + NodeInfo.x,
+            y: nodePositions.PComp1.y + NodeInfo.y
+        }
     }
 };
 
@@ -150,6 +169,9 @@ var nodeStore = assign({}, EventEmitter.prototype, {
     getTGen1Position: function(){
         return nodePositions.TGen1;
     },
+    getPComp1Position: function(){
+        return nodePositions.PComp1;
+    },
 
     /* For edge use */
     //getGateNodeOutPort: function(){
@@ -163,6 +185,13 @@ var nodeStore = assign({}, EventEmitter.prototype, {
     },
     getTGenNodeInportEna: function(){
         return tgenNodeInports.ena;
+    },
+
+    getGate1SelectedState: function(){
+        return nodeSelectedStates.Gate1;
+    },
+    getTGen1SelectedState: function(){
+        return nodeSelectedStates.TGen1;
     }
 });
 
@@ -190,6 +219,13 @@ AppDispatcher.register(function(payload){
             //console.log(payload);
             //console.log(item);
             updateNodePosition(item);
+            nodeStore.emitChange();
+            break;
+
+        case appConstants.SELECT_NODE:
+            console.log(payload);
+            console.log(item);
+            selectNode(item);
             nodeStore.emitChange();
             break;
 

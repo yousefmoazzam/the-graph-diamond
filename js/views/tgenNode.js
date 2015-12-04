@@ -3,13 +3,16 @@
  */
 
 var React = require('../../node_modules/react/react');
+var ReactDOM = require('../../node_modules/react-dom/dist/react-dom.js');
 var NodeStore = require('../stores/nodeStore.js');
+var nodeActions = require('../actions/nodeActions.js');
 
 function getTGenNodeState(){
     return{
         //position: NodeStore.getTGenNodePosition(),
         //inports: NodeStore.getTGenNodeInportsState(),
         //outports: NodeStore.getTGenNodeOutportsState()
+        selected: NodeStore.getTGen1SelectedState()
     }
 }
 
@@ -26,6 +29,9 @@ var TGenNode = React.createClass({
         NodeStore.addChangeListener(this._onChange);
         console.log(this.props);
         console.log(this.state);
+
+        ReactDOM.findDOMNode(this).addEventListener('NodeSelect', this.nodeSelect);
+
     },
 
     componentWillUnmount: function(){
@@ -40,15 +46,39 @@ var TGenNode = React.createClass({
         console.log("node has been dragged!");
     },
 
+    mouseOver: function(){
+        //console.log("mouseOver");
+        var test = document.getElementById('TGenRectangle');
+        test.style.stroke = '#797979'
+    },
+
+    mouseLeave: function(){
+        //console.log("mouseLeave");
+        var test = document.getElementById('TGenRectangle');
+
+        if(this.state.selected === true){
+            console.log("this.state.selected is true, so don't reset the border colour");
+        }
+        else{
+            test.style.stroke = 'black'
+        }
+    },
+
+    nodeSelect: function(){
+        console.log("TGen1 has been selected");
+        nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
+        console.log(this.state.selected);
+    },
+
     render: function(){
         return (
-            <svg {...this.props} >
+            <svg {...this.props} onMouseOver={this.mouseOver} onMouseLeave={this.mouseLeave} >
 
                 <g style={{MozUserSelect: 'none'}} >
                     <Rectangle id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}}/> /* To allow the cursor to change when hovering over the entire node container */
 
-                    <Rectangle id="rectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
-                               style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}}
+                    <Rectangle id="TGenRectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
+                               style={{fill: 'lightgrey', 'strokeWidth': 1.65}} stroke={this.state.selected ? '#797979' : 'black'}
                                //onClick={this.nodeClick} onDragStart={this.nodeDrag}
                     />
                     <Port cx={TGenNodePortStyling.inportPositions.ena.x} cy={TGenNodePortStyling.inportPositions.ena.y} r={TGenNodePortStyling.portRadius}
