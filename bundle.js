@@ -108,7 +108,7 @@ var App = React.createClass({displayName: "App",
         //console.log(document.getElementById('appContainer'));
         //console.log(document.getElementById('Gate1'));
 
-        this.setState({moveFunction: this.moveElement});
+        this.setState({moveFunction: this.defaultMoveFunction});
 
     },
     componentWillUnmount: function(){
@@ -137,6 +137,7 @@ var App = React.createClass({displayName: "App",
         console.log(evt);
         console.log(evt.currentTarget);
 
+        this.setState({moveFunction: this.moveElement});
         this.setState({draggedElement: evt.currentTarget}); /* Need to send to store */
         nodeActions.draggedElement(evt.currentTarget.id);
         nodeActions.deselectAllNodes("deselect all nodes");
@@ -157,6 +158,10 @@ var App = React.createClass({displayName: "App",
         this.setState({beforeDrag: startCoordinates});
         //this.setState({moveFunction: this.anotherMoveFunction}); /* Seeing if I can do this in the default mouse move to check the distance of movement to be a click or drag */
         this.setState({afterDrag: startCoordinates}); /* This is just in case no movement occurs, if there is movement then this will be overwritten */
+
+    },
+
+    defaultMoveFunction(){
 
     },
 
@@ -191,7 +196,7 @@ var App = React.createClass({displayName: "App",
 
         /* If mouse movement is minimal, don't change it, but if mouse movement is big enough, change the state */
 
-        console.log(e);
+        //console.log(e);
 
         var updatedCoordinates = {
             x: e.nativeEvent.clientX,
@@ -229,12 +234,12 @@ var App = React.createClass({displayName: "App",
         if(this.state.beforeDrag.x === this.state.afterDrag.x && this.state.beforeDrag.y === this.state.afterDrag.y){
             console.log("zero movement between mouseUp and mouseDown, so it's a click!");
             this.state.draggedElement.dispatchEvent(NodeSelect); /* draggedElement happens to be the element that is clicked as well as the element that is dragged! */
-            this.setState({moveFunction: this.moveElement});
+            this.setState({moveFunction: this.defaultMoveFunction});
             this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
             this.setState({afterDrag: null});
         }
         else{
-            this.setState({moveFunction: this.moveElement});
+            this.setState({moveFunction: this.defaultMoveFunction});
             this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
             this.setState({afterDrag: null});
         }
