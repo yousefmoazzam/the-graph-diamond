@@ -1,4 +1,8 @@
 /**
+ * Created by twi18192 on 08/12/15.
+ */
+
+/**
  * Created by twi18192 on 24/11/15.
  */
 
@@ -13,14 +17,11 @@ function getGateNodeState(){
         //inports: NodeStore.getGateNodeInportsState(),
         //outports: NodeStore.getGateNodeOutportsState()
         selected: NodeStore.getGate1SelectedState(),
-        areAnyNodesSelected: NodeStore.getIfAnyNodesAreSelected(),
-        defaultStyling: NodeStore.getGateNodeStyling(),
-        selectedStyling: NodeStore.getSelectedGateNodeStyling(),
-        currentStyling: NodeStore.getGate1CurrentStyling()
+        areAnyNodesSelected: NodeStore.getIfAnyNodesAreSelected()
     }
 }
 
-var GateNode = React.createClass({
+var GateNodeFocused = React.createClass({
     getInitialState: function(){
         return getGateNodeState();
     },
@@ -69,12 +70,12 @@ var GateNode = React.createClass({
             y: evt.nativeEvent.clientY
         };
         this.setState({beforeDrag: startCoordinates},
-        function(){
-            this.setState({moveFunction: this.anotherMoveFunction},
-                function(){
-                    console.log("function has changed");
-                })
-        });
+            function(){
+                this.setState({moveFunction: this.anotherMoveFunction},
+                    function(){
+                        console.log("function has changed");
+                    })
+            });
     },
 
     moveElement: function(evt){
@@ -94,18 +95,18 @@ var GateNode = React.createClass({
 
         if(!this.state.afterDrag){
             this.setState({afterDrag: updatedCoordinates},
-            function(){
-                this.differenceBetweenMouseDownAndMouseUp(this.state.beforeDrag, this.state.afterDrag)
-            })
-        }
-        else{
-            this.setState({beforeDrag: this.state.afterDrag},
-            function(){
-                this.setState({afterDrag: updatedCoordinates},
                 function(){
                     this.differenceBetweenMouseDownAndMouseUp(this.state.beforeDrag, this.state.afterDrag)
                 })
-            })
+        }
+        else{
+            this.setState({beforeDrag: this.state.afterDrag},
+                function(){
+                    this.setState({afterDrag: updatedCoordinates},
+                        function(){
+                            this.differenceBetweenMouseDownAndMouseUp(this.state.beforeDrag, this.state.afterDrag)
+                        })
+                })
         }
     },
 
@@ -160,7 +161,6 @@ var GateNode = React.createClass({
         nodeActions.selectNode(ReactDOM.findDOMNode(this).id);
         console.log(this.state.selected);
         console.log(this.state.areAnyNodesSelected);
-        //nodeActions.changeGate1Styling("check Gate1's state!");
 
         //console.log(ReactDOM.findDOMNode(this));
         //console.log(ReactDOM.findDOMNode(this).id);
@@ -174,13 +174,6 @@ var GateNode = React.createClass({
     },
 
     render: function(){
-        var rectangleStyling = this.state.currentStyling.rectangle.rectangleStyling;
-        var rectanglePosition = this.state.currentStyling.rectangle.rectanglePosition;
-        var inportPositions = this.state.currentStyling.ports.portPositions.inportPositions;
-        var portStyling = this.state.currentStyling.ports.portStyling;
-        var outportPositions = this.state.currentStyling.ports.portPositions.outportPositions;
-        var textPosition = this.state.currentStyling.text.textPositions;
-
         return (
             <svg {...this.props} onMouseOver={this.mouseOver} onMouseLeave={this.mouseLeave} style={this.state.selected && this.state.areAnyNodesSelected || !this.state.selected && !this.state.areAnyNodesSelected ? window.NodeContainerStyle : window.nonSelectedNodeContainerStyle}
                 //onMouseDown={this.mouseDown} onMouseUp={this.mouseUp} onMouseLeave={this.mouseLeave} onMouseMove={this.mouseMove}
@@ -192,27 +185,22 @@ var GateNode = React.createClass({
 
                 <g  style={{MozUserSelect: 'none'}} onMouseDown={this.mouseDown} >
                     <rect id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}} /* To allow the cursor to change when hovering over the entire node container */
-                                 />
-
-                    <Rectangle id="GateRectangle" height={rectangleStyling.height} width={rectangleStyling.width} x={rectanglePosition.x} y={rectanglePosition.y}
-                               rx={7} ry={7}
-                               style={{fill: 'lightgrey', 'strokeWidth': 1.65, stroke: this.state.selected === true ? '#797979' : 'black'}}
-                               //onDragStart={this.rectangleDrag}
                     />
-                    <Port cx={inportPositions.set.x} cy={inportPositions.set.y} r={portStyling.portRadius}
-                          style={{fill: portStyling.fill, stroke: portStyling.stroke, 'strokeWidth': portStyling.strokeWidth}}/>
 
-                    <Port cx={inportPositions.reset.x} cy={inportPositions.reset.y} r={portStyling.portRadius}
-                          style={{fill: portStyling.fill, stroke: portStyling.stroke, 'strokeWidth': portStyling.strokeWidth}}/>
+                    <Rectangle id="GateFocusedRectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="6" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
+                               style={{fill: 'lightgrey', 'strokeWidth': 1.65, stroke: this.state.selected === true ? '#797979' : 'black'}}
+                        //onDragStart={this.rectangleDrag}
+                    />
+                    <Port cx={FocusedGateNodePortStyling.inportPositions.set.x} cy={FocusedGateNodePortStyling.inportPositions.set.y} r={FocusedGateNodePortStyling.portRadius}
+                          style={{fill: 'black', stroke: 'green', 'strokeWidth': 1.65}}/>
+                    <Port cx={FocusedGateNodePortStyling.inportPositions.reset.x} cy={FocusedGateNodePortStyling.inportPositions.reset.y} r={FocusedGateNodePortStyling.portRadius}
+                          style={{fill: 'black', stroke: 'green', 'strokeWidth': 1.65}}/>
+                    <Port cx={FocusedGateNodePortStyling.outportPositions.out.x} cy={FocusedGateNodePortStyling.outportPositions.out.y} r={FocusedGateNodePortStyling.portRadius}
+                          style={{fill: 'black', stroke: 'green', 'strokeWidth': 1.65}}/>
 
-                    <Port cx={outportPositions.out.x} cy={outportPositions.out.y} r={portStyling.portRadius}
-                          style={{fill: portStyling.fill, stroke: portStyling.stroke, 'strokeWidth': portStyling.strokeWidth}}/>
-
-                    <InportSetText x={textPosition.set.x} y={textPosition.set.y} style={{MozUserSelect: 'none'}}  />
-
-                    <InportResetText x={textPosition.reset.x} y={textPosition.reset.y} style={{MozUserSelect: 'none'}}  />
-
-                    <OutportOutText x={textPosition.out.x} y={textPosition.out.y} style={{MozUserSelect: 'none'}}  />
+                    <InportSetText x="15" y={NodeStylingProperties.height / 2 - 6} style={{MozUserSelect: 'none'}}  />
+                    <InportResetText x="15" y={NodeStylingProperties.height / 2 + 12} style={{MozUserSelect: 'none'}}  />
+                    <OutportOutText x={NodeStylingProperties.width - 20} y={NodeStylingProperties.height / 2 + 3} style={{MozUserSelect: 'none'}}  />
 
                     <NodeName x="20" y={NodeStylingProperties.height + 22} style={{MozUserSelect: 'none'}} />
                     <NodeType x="25" y={NodeStylingProperties.height + 33} style={{MozUserSelect: 'none'}} />
@@ -231,24 +219,24 @@ var NodeStylingProperties = {
     ry: 7
 };
 
-var GateNodePortStyling = {
+var FocusedGateNodePortStyling = {
     inportPositions: {
         set: {
-            x: 3,
+            x: 6,
             y: 25
         },
         reset: {
-            x: 3,
+            x: 6,
             y: 40
         }
     },
     outportPositions: {
         out: {
-            x: NodeStylingProperties.width + 3,
+            x: NodeStylingProperties.width + 6,
             y: 33
         }
     },
-    portRadius: 2,
+    portRadius: 5,
     inportPositionRatio: 0,
     outportPositionRatio: 1
 };
@@ -319,75 +307,4 @@ var Port = React.createClass({
     }
 });
 
-module.exports = GateNode;
-
-
-//mouseDown: function(e){
-//    console.log("mouseDown");
-//    console.log(e);
-//    var startCoordinates = {
-//        x: e.nativeEvent.clientX,
-//        y: e.nativeEvent.clientY
-//    };
-//    this.setState({beforeDrag: startCoordinates}); /* Not using Flux for the moment, just seeing if this'll work */
-//},
-//
-//mouseUp: function(e){
-//    console.log("mouseUp");
-//    console.log(e)
-//},
-//
-//dragStart: function(e){
-//    e.preventDefault();
-//    console.log("dragStart");
-//    console.log(e);
-//    e.dataTransfer.dropEffect ='move';
-//
-//    var startCoordinates = {
-//        x: e.nativeEvent.clientX,
-//        y: e.nativeEvent.clientY
-//    };
-//    this.setState({beforeDrag: startCoordinates});
-//},
-//
-//dragEnd: function(e){
-//    e.preventDefault();
-//    e.stopPropagation();
-//    console.log("dragEnd");
-//    console.log(e);
-//    //setTimeout(this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, this.state.afterDrag), 1000);
-//
-//
-//},
-//
-//drag: function(e){
-//    e.preventDefault();
-//    console.log("drag");
-//    console.log(e);
-//},
-//
-//mouseLeave: function(e){
-//    console.log("mouseLeave");
-//    console.log(e);
-//    var endCoordinates = {
-//        x: e.nativeEvent.clientX,
-//        y: e.nativeEvent.clientY
-//    };
-//    this.setState({afterDrag: endCoordinates});
-//    //this.differenceBetweenMouseDownAndMouseLeave(this.state.beforeDrag, endCoordinates)
-//},
-//
-//differenceBetweenMouseDownAndMouseLeave: function(start, end){
-//    var differenceInCoordinates = {
-//        x: end.x - start.x,
-//        y: end.y - start.y
-//    };
-//    nodeActions.changeGateNodePosition(differenceInCoordinates);
-//},
-//
-//mouseMove: function(e){
-//    //e.preventDefault();
-//    console.log("mouseMove");
-//    console.log(e);
-//
-//},
+module.exports = GateNodeFocused;

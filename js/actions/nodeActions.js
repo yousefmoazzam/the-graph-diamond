@@ -18,6 +18,12 @@ var nodeActions = {
             item : item
         })
     },
+    draggedElementID: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.DRAGGED_ELEMENTID,
+            item : item
+        })
+    },
     changeNodePosition: function(item){
         AppDispatcher.handleAction({
             actionType: appConstants.CHANGE_NODEPOSITION,
@@ -36,7 +42,14 @@ var nodeActions = {
             actionType: appConstants.DESELECT_ALLNODES,
             item: item
         })
-    }
+    },
+
+    //changeGate1Styling: function(item){
+    //    AppDispatcher.handleAction({
+    //        actionType: appConstants.CHANGE_GATE1STYLING,
+    //        item: item
+    //    })
+    //}
 };
 
 module.exports = nodeActions;

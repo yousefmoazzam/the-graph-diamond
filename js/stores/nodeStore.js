@@ -10,6 +10,7 @@ var assign = require('../../node_modules/object-assign/index.js');
 var CHANGE_EVENT = 'change';
 
 var draggedElement = null;
+var draggedElementID = null;
 
 var nodeSelectedStates = {
     Gate1: false,
@@ -25,6 +26,35 @@ function deselectAllNodes(){
         nodeSelectedStates[node] = false
     }
     console.log(nodeSelectedStates);
+}
+
+//function changeUnselectedNodesOpacity(){
+//    console.log(window.NodeContainerStyle);
+//    window.NodeContainerStyle = {
+//        'cursor': 'move',
+//        'draggable': 'true',
+//        'className': 'nodeContainer',
+//        'opacity': 0.5
+//    };
+//    console.log(window.NodeContainerStyle);
+//
+//}
+
+function checkIfAnyNodesAreSelected(){
+    var areAnyNodesSelected = null;
+    for(var node in nodeSelectedStates){
+        if(nodeSelectedStates[node] === true){
+            console.log(nodeSelectedStates[node]);
+            areAnyNodesSelected = true;
+            break;
+        }
+        else{
+            //console.log("one of the nodes' state is false, check the next one if it is true");
+            areAnyNodesSelected = false;
+        }
+    }
+    //console.log(areAnyNodesSelected);
+    return areAnyNodesSelected;
 }
 
 var allNodeInfo = {
@@ -72,17 +102,17 @@ var portPositionsForNodes = {
     GateNodePortStyling: {
         inportPositions: {
             set: {
-                x: 3,
+                x: 6,
                 y: 25
             },
             reset: {
-                x: 3,
+                x: 6,
                 y: 40
             }
         },
         outportPositions: {
             out: {
-                x: 65 + 3,
+                x: 68 + 3,
                 y: 33
             }
         }
@@ -118,10 +148,10 @@ function updateGate1Position(newCoordinates){
 }
 
 function updateNodePosition(NodeInfo){
-    if(typeof allPossibleNodes[draggedElement] !== 'function'){
+    if(typeof allPossibleNodes[draggedElementID] !== 'function'){
         throw new Error('Invalid node id')
     }
-     return allPossibleNodes[draggedElement](NodeInfo)
+     return allPossibleNodes[draggedElementID](NodeInfo)
 }
 
 var allPossibleNodes = {
@@ -145,6 +175,132 @@ var allPossibleNodes = {
         }
     }
 };
+
+var GateNodeStyling = {
+    rectangle: {
+        rectanglePosition: {
+            x : 6,
+            y : 2
+        },
+        rectangleStyling: {
+            height: 65,
+            width: 65,
+            rx: 7,
+            ry: 7
+        }
+    },
+    ports: {
+        portPositions: {
+            inportPositions: {
+                set: {
+                    x: 6,
+                    y: 25
+                },
+                reset: {
+                    x: 6,
+                    y: 40
+                }
+            },
+            outportPositions: {
+                out: {
+                    x: 71,
+                    y: 33
+                }
+            },
+        },
+        portStyling: {
+            portRadius: 2,
+            fill: 'black',
+            stroke: 'black',
+            strokeWidth: 1.65
+        }
+    },
+    text: {
+        textPositions: {
+            set: {
+                x : 13,
+                y: 26.5
+            },
+            reset: {
+                x : 13,
+                y: 44.5
+            },
+            out: {
+                x: 48,
+                y: 35.5
+            }
+        }
+    }
+};
+
+var SelectedGateNodeStyling = {
+    rectangle: {
+        rectanglePosition: {
+            x : 6,
+            y : 2
+        },
+        rectangleStyling: {
+            height: 65,
+            width: 65,
+            rx: 7,
+            ry: 7
+        }
+    },
+    ports: {
+        portPositions: {
+            inportPositions: {
+                set: {
+                    x: 6,
+                    y: 25
+                },
+                reset: {
+                    x: 6,
+                    y: 40
+                }
+            },
+            outportPositions: {
+                out: {
+                    x: 71,
+                    y: 33
+                }
+            },
+        },
+        portStyling: {
+            portRadius: 4,
+            fill: 'lightgrey',
+            stroke: 'black',
+            strokeWidth: 1.65
+        }
+    },
+    text: {
+        textPositions: {
+            set: {
+                x : 15,
+                y: 26.5
+            },
+            reset: {
+                x : 15,
+                y: 44.5
+            },
+            out: {
+                x: 45,
+                y: 35.5
+            }
+        }
+    }
+};
+
+var Gate1CurrentStyling = GateNodeStyling;
+
+function checkGate1Styling(){
+    if(nodeSelectedStates.Gate1 === true){
+        Gate1CurrentStyling = SelectedGateNodeStyling;
+    }
+    else{
+        Gate1CurrentStyling = GateNodeStyling
+    }
+    return Gate1CurrentStyling
+}
 
 var nodeStore = assign({}, EventEmitter.prototype, {
     addChangeListener: function(cb){
@@ -199,6 +355,25 @@ var nodeStore = assign({}, EventEmitter.prototype, {
     },
     getTGen1SelectedState: function(){
         return nodeSelectedStates.TGen1;
+    },
+
+    getIfAnyNodesAreSelected: function(){
+        return checkIfAnyNodesAreSelected();
+    },
+
+    getDraggedElement: function(){
+        return draggedElement;
+    },
+
+
+    getGateNodeStyling: function(){
+        return GateNodeStyling;
+    },
+    getSelectedGateNodeStyling: function(){
+        return SelectedGateNodeStyling;
+    },
+    getGate1CurrentStyling: function(){
+        return checkGate1Styling();
     }
 });
 
@@ -217,9 +392,19 @@ AppDispatcher.register(function(payload){
 
         case appConstants.DRAGGED_ELEMENT:
             console.log(payload);
-            console.log(action);
+            console.log(item);
             draggedElement = item;
             console.log(draggedElement);
+            nodeStore.emitChange();
+            break;
+
+
+        case appConstants.DRAGGED_ELEMENTID:
+            console.log(payload);
+            console.log(action);
+            draggedElementID = item;
+            console.log(draggedElementID);
+            nodeStore.emitChange();
             break;
 
         case appConstants.CHANGE_NODEPOSITION:
@@ -234,6 +419,7 @@ AppDispatcher.register(function(payload){
             console.log(item);
             selectNode(item);
             console.log(nodeSelectedStates);
+            //changeUnselectedNodesOpacity();
             nodeStore.emitChange();
             break;
 
@@ -245,6 +431,13 @@ AppDispatcher.register(function(payload){
             console.log(nodeSelectedStates.TGen1);
             nodeStore.emitChange();
             break;
+
+        //case appConstants.CHANGE_GATE1STYLING:
+        //    console.log(payload);
+        //    console.log(item);
+        //    checkGate1Styling();
+        //    nodeStore.emitChange();
+        //    break;
 
 
         default:

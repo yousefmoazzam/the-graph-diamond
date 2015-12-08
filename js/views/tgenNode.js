@@ -12,7 +12,8 @@ function getTGenNodeState(){
         //position: NodeStore.getTGenNodePosition(),
         //inports: NodeStore.getTGenNodeInportsState(),
         //outports: NodeStore.getTGenNodeOutportsState()
-        selected: NodeStore.getTGen1SelectedState()
+        selected: NodeStore.getTGen1SelectedState(),
+        areAnyNodesSelected: NodeStore.getIfAnyNodesAreSelected()
     }
 }
 
@@ -71,11 +72,18 @@ var TGenNode = React.createClass({
         console.log(this.state.selected);
     },
 
+    mouseDown: function(e){
+        console.log("Gate1 mouseDown");
+        console.log(e.currentTarget);
+        console.log(e.currentTarget.parentNode);
+        nodeActions.draggedElement(e.currentTarget.parentNode);
+    },
+
     render: function(){
         return (
-            <svg {...this.props} onMouseOver={this.mouseOver} onMouseLeave={this.mouseLeave} >
+            <svg {...this.props} onMouseOver={this.mouseOver} onMouseLeave={this.mouseLeave} style={this.state.selected && this.state.areAnyNodesSelected || !this.state.selected && !this.state.areAnyNodesSelected ? window.NodeContainerStyle : window.nonSelectedNodeContainerStyle} >
 
-                <g style={{MozUserSelect: 'none'}} >
+                <g style={{MozUserSelect: 'none'}} onMouseDown={this.mouseDown} >
                     <Rectangle id="nodeBackground" height="105" width="71" style={{fill: 'transparent', cursor: 'move'}}/> /* To allow the cursor to change when hovering over the entire node container */
 
                     <Rectangle id="TGenRectangle" height={NodeStylingProperties.height} width={NodeStylingProperties.width} x="3" y="2" rx={NodeStylingProperties.rx} ry={NodeStylingProperties.ry}
