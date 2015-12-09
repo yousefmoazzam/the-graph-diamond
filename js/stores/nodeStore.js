@@ -302,6 +302,11 @@ function checkGate1Styling(){
     return Gate1CurrentStyling
 }
 
+var graphPosition = {
+    x: 0,
+    y: 0
+};
+
 var nodeStore = assign({}, EventEmitter.prototype, {
     addChangeListener: function(cb){
         this.on(CHANGE_EVENT, cb)
@@ -374,6 +379,10 @@ var nodeStore = assign({}, EventEmitter.prototype, {
     },
     getGate1CurrentStyling: function(){
         return checkGate1Styling();
+    },
+
+    getGraphPosition: function(){
+        return graphPosition;
     }
 });
 
@@ -429,6 +438,13 @@ AppDispatcher.register(function(payload){
             deselectAllNodes();
             console.log(nodeSelectedStates.Gate1);
             console.log(nodeSelectedStates.TGen1);
+            nodeStore.emitChange();
+            break;
+
+        case appConstants.CHANGE_GRAPHPOSITION:
+            console.log(payload);
+            console.log(item);
+            graphPosition = item;
             nodeStore.emitChange();
             break;
 

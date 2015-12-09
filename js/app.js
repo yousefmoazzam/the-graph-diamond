@@ -65,7 +65,8 @@ function getAppState(){
         Gate1Position: NodeStore.getGate1Position(),
         TGen1Position: NodeStore.getTGen1Position(),
         PComp1Position: NodeStore.getPComp1Position(),
-        draggedElement: NodeStore.getDraggedElement()
+        draggedElement: NodeStore.getDraggedElement(),
+        graphPosition: NodeStore.getGraphPosition()
     }
 }
 
@@ -82,6 +83,7 @@ var App = React.createClass({
         //console.log(document.getElementById('Gate1'));
 
         this.setState({moveFunction: this.defaultMoveFunction});
+        this.setState({panMoveFunction: this.defaultMoveFunction});
 
     },
     componentWillUnmount: function(){
@@ -279,6 +281,7 @@ var App = React.createClass({
     mouseLeave: function(e){
         console.log("mouseLeave, left the window, emulate a mouseUp event!");
         this.setState({moveFunction: this.defaultMoveFunction});
+        this.setState({panMoveFunction: this.defaultMoveFunction()});
         this.setState({beforeDrag: null});
         this.setState({afterDrag: null});
     },
@@ -307,53 +310,107 @@ var App = React.createClass({
         window.NodeContainerStyle[opacity] = 0.5
     },
 
+    wheelZoom: function(e){
+        console.log("wheel!");
+        console.log(e);
+    },
+
+    panMouseDown: function(e){
+        console.log("panMouseDown");
+        this.setState({panMoveFunction: this.panMouseMove});
+        this.dragging = true;
+
+        this.coords = {
+            x: e.nativeEvent.clientX,
+            y: e.nativeEvent.clientY
+        };
+
+    },
+
+    panMouseUp: function(e){
+        console.log("panMouseUp");
+        this.setState({panMoveFunction: this.defaultMoveFunction});
+        this.dragging = false;
+
+        this.coords = {};
+    },
+
+    panMouseMove: function(e){
+        if(this.dragging){
+            e.preventDefault();
+        }
+
+        var dx = this.coords.x - e.nativeEvent.clientX;
+        var dy = this.coords.y - e.nativeEvent.clientY;
+
+        this.coords.x = e.nativeEvent.clientX;
+        this.coords.y = e.nativeEvent.clientY;
+
+        var xChange = this.state.graphPosition.x - dx;
+        var yChange = this.state.graphPosition.y - dy;
+
+        var newCoords = {
+            x: xChange,
+            y: yChange
+        };
+
+        nodeActions.changeGraphPosition(newCoords);
+    },
+
 
 
     render: function(){
         return(
-            <svg id="appContainer" style={AppContainerStyle} onMouseMove={this.state.moveFunction} onMouseLeave={this.mouseLeave}
-                 //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
-            >
-                <rect id="dragArea" height="10000" width="10000" fill="transparent"  style={{MozUserSelect: 'none'}}
-                      onClick={this.deselect}></rect>
+            <svg id="appAndDragAreaContainer" onMouseMove={this.state.moveFunction} onMouseLeave={this.mouseLeave} >
+                <rect id="dragArea" height="100%" width="100%" fill="transparent"  style={{MozUserSelect: 'none'}}
+                      onClick={this.deselect} onMouseDown={this.panMouseDown} onMouseUp={this.panMouseUp}
+                      onMouseMove={this.state.panMoveFunction}
+                ></rect>
+                <svg id="appContainer" style={AppContainerStyle}  onWheel={this.wheelZoom}
+                     x={this.state.graphPosition.x} y={this.state.graphPosition.y}
+                    //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
+                >
 
-                <g id="EdgesGroup" >
-                    <Edge/>
-                </g>
 
-                <g id="NodesGroup" >
-                    <GateNode id="Gate1"
-                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 13} x={this.state.Gate1Position.x} y={this.state.Gate1Position.y}
-                              //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
+                    <g id="EdgesGroup" >
+                        <Edge/>
+                    </g>
 
-                              onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
-                              //onMouseMove={this.state.moveFunction}
+                    <g id="NodesGroup" >
+                        <GateNode id="Gate1"
+                                  height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 13} x={this.state.Gate1Position.x} y={this.state.Gate1Position.y}
+                            //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
 
-                    />
-                    <TGenNode id="TGen1"
-                              height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.TGen1Position.x} y={this.state.TGen1Position.y}
+                                  onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
+                            //onMouseMove={this.state.moveFunction}
 
-                              onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
-                    />
+                        />
+                        <TGenNode id="TGen1"
+                                  height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.TGen1Position.x} y={this.state.TGen1Position.y}
 
-                    <PCompNode id="PComp1" style={window.NodeContainerStyle}
-                               height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.PComp1Position.x} y={this.state.PComp1Position.y}
-                               onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
-                    />
-                </g>
+                                  onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
+                        />
 
-                <Draggable   axis="both"
-                           handle=".handle"
-                           start={{x: 20, y: 20}} /* Starting position, not sure if its relative to the window, or just to its parent */
-                           grid={[25, 25]} /* If you want the object to snap to a certain quantised pixel interval, set it here */
-                           zIndex={100} /* I think this allows you to set if it goes on top of other thingas when dragged, or goes below them */
-                           onStart={this.handleStart}
-                           onDrag={this.handleDrag}
-                           onStop={this.handleStop}>
-                    <rect className="handle" height="100" width="100" id="test" style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}} ></rect>
-                </Draggable> /* The problem is that it uses CSS transforms to translate, not updating state... */
+                        <PCompNode id="PComp1" style={window.NodeContainerStyle}
+                                   height={NodeStylingProperties.height + 40} width={NodeStylingProperties.width + 6} x={this.state.PComp1Position.x} y={this.state.PComp1Position.y}
+                                   onMouseDown={this.mouseDownSelectElement}  onMouseUp={this.mouseUp}
+                        />
+                    </g>
 
+                    <Draggable   axis="both"
+                                 handle=".handle"
+                                 start={{x: 20, y: 20}} /* Starting position, not sure if its relative to the window, or just to its parent */
+                                 grid={[25, 25]} /* If you want the object to snap to a certain quantised pixel interval, set it here */
+                                 zIndex={100} /* I think this allows you to set if it goes on top of other thingas when dragged, or goes below them */
+                                 onStart={this.handleStart}
+                                 onDrag={this.handleDrag}
+                                 onStop={this.handleStop}>
+                        <rect className="handle" height="100" width="100" id="test" style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}} ></rect>
+                    </Draggable> /* The problem is that it uses CSS transforms to translate, not updating state... */
+
+                </svg>
             </svg>
+
         )
     }
 });

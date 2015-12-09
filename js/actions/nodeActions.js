@@ -50,6 +50,13 @@ var nodeActions = {
     //        item: item
     //    })
     //}
+
+    changeGraphPosition: function(item){
+        AppDispatcher.handleAction({
+            actionType: appConstants.CHANGE_GRAPHPOSITION,
+            item: item
+        })
+    }
 };
 
 module.exports = nodeActions;
