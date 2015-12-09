@@ -116,8 +116,6 @@ var App = React.createClass({
             mouseDownY: evt.nativeEvent.clientY
         });
 
-        console.log(evt.nativeEvent.clientX);
-
         this.setState({moveFunction: this.moveElement});
         //this.setState({draggedElement: evt.currentTarget}); /* Need to send to store */ /* Used for node event firing */ /* Replaced with nodeAction to update store in Gate1*/
         nodeActions.draggedElementID(evt.currentTarget.id);
@@ -162,7 +160,7 @@ var App = React.createClass({
         var mouseMovementX = evt.nativeEvent.clientX - this.state.mouseDownX;
         var mouseMovementY = evt.nativeEvent.clientY - this.state.mouseDownY;
 
-        if((Math.abs(mouseMovementX) < 3 && Math.abs(mouseMovementY) < 3) || (Math.abs(mouseMovementX) < 3 && Math.abs(mouseMovementY) === 0) || (Math.abs(mouseMovementX) === 0 && Math.abs(mouseMovementY) < 3) ){
+        if((Math.abs(mouseMovementX) <= 4 && Math.abs(mouseMovementY) <= 4) || (Math.abs(mouseMovementX) <= 4 && Math.abs(mouseMovementY) === 0) || (Math.abs(mouseMovementX) === 0 && Math.abs(mouseMovementY) <= 4) ){
             console.log("we have a click, not a drag!");
             /* Need to somehow prevent the zero movement click happening, it always happens for this click too, where's there's minimal movement */
             /* Or I could just have that if either occur then they change some state that says the node is selected, so either way it won't affect anything? */
@@ -177,8 +175,9 @@ var App = React.createClass({
             this.setState({afterDrag: smallChangeInCoords});
 
             /* These both HAVE to happen here, a node select needs to occur if the mouse movement is small enough */
-            this.state.draggedElement.dispatchEvent(NodeSelect); /* draggedElement happens to be the element that is clicked as well as the element that is dragged! */
-            this.deselect();
+            /* Actually, I think it makes more sense for the nodeSelect event fire to occur on the mouse up, otherwise here it'll get called for any small movement! */
+            //this.state.draggedElement.dispatchEvent(NodeSelect); /* draggedElement happens to be the element that is clicked as well as the element that is dragged! */
+            //this.deselect();
         }
         else{
             console.log("mouseMovementX & Y are big enough, is probably a drag!");
@@ -226,8 +225,8 @@ var App = React.createClass({
         console.log(e);
         console.log(this.state.afterDrag);
         console.log(this.state.mouseDownX);
-        console.log(Math.abs(this.state.afterDrag.x - this.state.mouseDownX));
-        console.log(Math.abs(this.state.afterDrag.y - this.state.mouseDownY));
+        console.log(Math.abs(e.nativeEvent.clientX - this.state.mouseDownX));
+        console.log(Math.abs(e.nativeEvent.clientY - this.state.mouseDownY));
 
 
 
@@ -238,20 +237,29 @@ var App = React.createClass({
             this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
             this.setState({afterDrag: null});
         }
-        /* This is when the mouse has moved far enough that we treat it as a drag, still need to accomodate if we have a mouseup when there's been a small amount of movement but is still a click */
-        else if(Math.abs(this.state.afterDrag.x - this.state.mouseDownX) > 3 && Math.abs(this.state.afterDrag.y - this.state.mouseDownY) > 3){
+        /* This is when the mouse has moved far enough that we treat it as a drag, still need to accommodate if we have a mouseup when there's been a small amount of movement but is still a click */
+        else if(Math.abs(this.state.afterDrag.x - this.state.mouseDownX) > 4 && Math.abs(this.state.afterDrag.y - this.state.mouseDownY) > 4){
             console.log("the mouse moved far enough to be a drag");
             this.setState({moveFunction: this.defaultMoveFunction});
             this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
             this.setState({afterDrag: null});
         }
-        else if(Math.abs(this.state.afterDrag.x - this.state.mouseDownX) < 3 && Math.abs(this.state.afterDrag.y - this.state.mouseDownY) < 3){
+        /* Not ideal, but it fixes the annoying 'select a node even if it moves a lot in one axis but not the other' bug for now */
+        else if((0 <= Math.abs(e.nativeEvent.clientX - this.state.mouseDownX) <= 4 && Math.abs(e.nativeEvent.clientY - this.state.mouseDownY) > 4) ||
+            (Math.abs(e.nativeEvent.clientX - this.state.mouseDownX) > 4 && 0 <= Math.abs(e.nativeEvent.clientY - this.state.mouseDownY) <= 4)){
+            console.log("> 4 movement in one axis but < 4 movement in the other");
+            this.setState({moveFunction: this.defaultMoveFunction});
+            this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
+            this.setState({afterDrag: null});
+        }
+        else if((0 <= Math.abs(e.nativeEvent.clientX - this.state.mouseDownX) <= 4 && 0 <= Math.abs(e.nativeEvent.clientY - this.state.mouseDownY) <= 4) ){
             console.log("there was minimal mouse movement between mouseDown and mouseUp so it was probably a click!");
             this.state.draggedElement.dispatchEvent(NodeSelect); /* draggedElement happens to be the element that is clicked as well as the element that is dragged! */
             this.setState({moveFunction: this.defaultMoveFunction});
             this.setState({beforeDrag: null}); /* Stops the cursor from jumping back to where it previously was on the last drag */
             this.setState({afterDrag: null});
         }
+
 
 
 
