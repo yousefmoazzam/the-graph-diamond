@@ -425,53 +425,47 @@ var App = React.createClass({displayName: "App",
 
 
     render: function(){
+        var transform = "translate(" + this.state.graphPosition.x + "," + this.state.graphPosition.y + ")";
         return(
             React.createElement("svg", {id: "appAndDragAreaContainer", onMouseMove: this.state.moveFunction, onMouseLeave: this.mouseLeave}, 
                 React.createElement("rect", {id: "dragArea", height: "100%", width: "100%", fill: "transparent", style: {MozUserSelect: 'none'}, 
                       onClick: this.deselect, onMouseDown: this.panMouseDown, onMouseUp: this.panMouseUp, 
                       onMouseMove: this.state.panMoveFunction
                 }), 
-                React.createElement("svg", {id: "appContainer", style: AppContainerStyle, onWheel: this.wheelZoom, 
-                     x: this.state.graphPosition.x, y: this.state.graphPosition.y
+                React.createElement("svg", {id: "appContainer", style: AppContainerStyle, onWheel: this.wheelZoom
+                     //x={this.state.graphPosition.x} y={this.state.graphPosition.y}
                     //onDragOver={this.dragOver} onDragEnter={this.dragEnter} onDrop={this.drop}
                 }, 
+                    React.createElement("g", {id: "testPanGroup", transform: transform}, 
 
 
-                    React.createElement("g", {id: "EdgesGroup"}, 
-                        React.createElement(Edge, null)
-                    ), 
-
-                    React.createElement("g", {id: "NodesGroup"}, 
-                        React.createElement(GateNode, {id: "Gate1", 
-                                  height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 13, x: this.state.Gate1Position.x, y: this.state.Gate1Position.y, 
-                            //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
-
-                                  onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
-                            //onMouseMove={this.state.moveFunction}
-
-                        ), 
-                        React.createElement(TGenNode, {id: "TGen1", 
-                                  height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.TGen1Position.x, y: this.state.TGen1Position.y, 
-
-                                  onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
+                        React.createElement("g", {id: "EdgesGroup"}, 
+                            React.createElement(Edge, null)
                         ), 
 
-                        React.createElement(PCompNode, {id: "PComp1", style: window.NodeContainerStyle, 
-                                   height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.PComp1Position.x, y: this.state.PComp1Position.y, 
-                                   onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
+                        React.createElement("g", {id: "NodesGroup"}, 
+                            React.createElement(GateNode, {id: "Gate1", 
+                                      height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 13, x: this.state.Gate1Position.x, y: this.state.Gate1Position.y, 
+                                //onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDrag={this.drag}
+
+                                      onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
+                                //onMouseMove={this.state.moveFunction}
+
+                            ), 
+                            React.createElement(TGenNode, {id: "TGen1", 
+                                      height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.TGen1Position.x, y: this.state.TGen1Position.y, 
+
+                                      onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
+                            ), 
+
+                            React.createElement(PCompNode, {id: "PComp1", style: window.NodeContainerStyle, 
+                                       height: NodeStylingProperties.height + 40, width: NodeStylingProperties.width + 6, x: this.state.PComp1Position.x, y: this.state.PComp1Position.y, 
+                                       onMouseDown: this.mouseDownSelectElement, onMouseUp: this.mouseUp}
+                            )
                         )
-                    ), 
 
-                    React.createElement(Draggable, {axis: "both", 
-                                 handle: ".handle", 
-                                 start: {x: 20, y: 20}, /* Starting position, not sure if its relative to the window, or just to its parent */
-                                 grid: [25, 25], /* If you want the object to snap to a certain quantised pixel interval, set it here */
-                                 zIndex: 100, /* I think this allows you to set if it goes on top of other thingas when dragged, or goes below them */
-                                 onStart: this.handleStart, 
-                                 onDrag: this.handleDrag, 
-                                 onStop: this.handleStop}, 
-                        React.createElement("rect", {className: "handle", height: "100", width: "100", id: "test", style: {fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}})
-                    ), " /* The problem is that it uses CSS transforms to translate, not updating state... */"
+
+                    )
 
                 )
             )
@@ -559,6 +553,17 @@ ReactDOM.render(
 //    };
 //    nodeActions.changeGateNodePosition(differenceInCoordinates);
 //},
+
+//<Draggable   axis="both"
+//             handle=".handle"
+//             start={{x: 20, y: 20}} /* Starting position, not sure if its relative to the window, or just to its parent */
+//             grid={[25, 25]} /* If you want the object to snap to a certain quantised pixel interval, set it here */
+//             zIndex={100} /* I think this allows you to set if it goes on top of other thingas when dragged, or goes below them */
+//             onStart={this.handleStart}
+//             onDrag={this.handleDrag}
+//             onStop={this.handleStop}>
+//    <rect className="handle" height="100" width="100" id="test" style={{fill: 'lightgrey', stroke: 'black', 'strokeWidth': 1.65}} ></rect>
+//</Draggable> /* The problem is that it uses CSS transforms to translate, not updating state... */
 
 },{"../node_modules/react-dom/dist/react-dom.js":16,"../node_modules/react-draggable/dist/react-draggable":18,"../node_modules/react/react":174,"./actions/nodeActions.js":1,"./stores/nodeStore.js":5,"./views/edge.js":6,"./views/gateNode.js":7,"./views/gateNodeFocused":8,"./views/node.js":9,"./views/pcompNode.js":10,"./views/tgenNode.js":11}],3:[function(require,module,exports){
 /**
@@ -1142,7 +1147,7 @@ var Edge = React.createClass({displayName: "Edge",
     },
     render:function(){
         return(
-            React.createElement("svg", React.__spread({id: "edgeContainer"},  this.props), 
+            React.createElement("g", React.__spread({id: "edgeContainer"},  this.props), 
                 React.createElement(Line, {height: "100", width: "100", 
                       //x1={this.state.startNode.x} y1={this.state.startNode.y} x2={this.state.endNode.x} y2={this.state.endNode.y}
                       x1: this.state.Gate1Position.x + this.state.gateNodeOut.x, y1: this.state.Gate1Position.y + this.state.gateNodeOut.y, 

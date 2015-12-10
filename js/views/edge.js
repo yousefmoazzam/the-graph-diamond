@@ -32,13 +32,13 @@ var Edge = React.createClass({
     },
     render:function(){
         return(
-            <svg id="edgeContainer" {...this.props}>
+            <g id="edgeContainer" {...this.props}>
                 <Line height="100" width="100"
                       //x1={this.state.startNode.x} y1={this.state.startNode.y} x2={this.state.endNode.x} y2={this.state.endNode.y}
                       x1={this.state.Gate1Position.x + this.state.gateNodeOut.x} y1={this.state.Gate1Position.y + this.state.gateNodeOut.y}
                       x2={this.state.TGen1Position.x + this.state.tgenNodeEna.x} y2={this.state.TGen1Position.y + this.state.tgenNodeEna.y}
                       style={{strokeWidth: '5', stroke:"orange"}} />
-            </svg>
+            </g>
         )
     }
 });
